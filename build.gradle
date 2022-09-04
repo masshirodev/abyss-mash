@@ -1,0 +1,35 @@
+plugins {
+    id 'java'
+}
+
+group 'org.example'
+version 'V1.0'
+
+repositories {
+    mavenCentral()
+    flatDir {
+        dirs 'lib'
+    }
+}
+
+
+dependencies {
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.13.3'
+    implementation 'org.mongodb:mongo-java-driver:3.12.11'
+//    implementation(files("path/to/your/lib.jar"))
+    //testCompile group: 'junit', name: 'junit', version: '4.12'
+    compileOnly name: 'AbyssStub-1.0-SNAPSHOT'
+}
+
+jar {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    destinationDirectory.set(file("C:\\Users\\Masshiro Iro\\Documents\\Abyss"))
+
+    manifest {
+        attributes "Main-Class": "kraken.plugin.mash.MashRunecrafting"
+    }
+
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+}
