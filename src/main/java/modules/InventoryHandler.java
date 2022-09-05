@@ -48,4 +48,14 @@ public class InventoryHandler {
 
         return quantity;
     }
+
+    public static boolean HaveAll(ArrayList<Integer> ids) {
+        WidgetItem[] all = GetDistinctWidgetItems();
+        ArrayList<Integer> have = new ArrayList<>();
+
+        for (WidgetItem item : all)
+            have.add(item.getId());
+
+        return have.containsAll(ids);
+    }
 }

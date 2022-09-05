@@ -1,9 +1,13 @@
 package kraken.plugin.mash;
 
+import com.google.common.base.Stopwatch;
+import enums.ConsumableType;
+import helpers.Helper;
 import javafx.util.Pair;
 import kraken.plugin.api.*;
+import models.ConsumableModel;
 import models.EnemyModel;
-import models.ManualLocationModel;
+import models.LocationModel;
 import models.RequirementModel;
 import modules.*;
 
@@ -11,6 +15,7 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 public final class MashCombat extends Plugin {
     public static boolean startRoutine = false;
@@ -20,13 +25,25 @@ public final class MashCombat extends Plugin {
     private static int comboSelected = 0;
     private static int newComboSelected = 0;
     private static ArrayList<Boolean> dropsEnabled;
+    public static boolean enableOverloads = false;
+    public static boolean enableAggression = false;
+    public static boolean enablePrayerRenew = false;
+    private static int usePrayerRenewPercentage = 20;
+    public static boolean enableFood = false;
+    public static int useFoodPercentage = 20;
+    public static boolean enablePrayerUsage = false;
+    public static int maxHealth = (int) Players.self().getHealth();
+    private static Stopwatch foodTimeout = Stopwatch.createStarted();
+    private static Stopwatch overloadTimeout = Stopwatch.createStarted();
+    private static Stopwatch prayerTimeout = Stopwatch.createStarted();
+    private static Stopwatch aggressionTimeout = Stopwatch.createStarted();
 
     public MashCombat() {
     }
 
     @Override
     public boolean onLoaded(PluginContext pluginContext) {
-        pluginContext.setName("MashCombat");
+        pluginContext.setName("MashCombat v1.05092022a");
         return true;
     }
 
@@ -42,24 +59,53 @@ public final class MashCombat extends Plugin {
     }
 
     public void CombatRoutine() {
+        ExecuteConsumables();
         if (Inventory.isFull()) {
-            ManualMovementHandler.GoTo(ManualLocationModel.GetLocationByName(enemyChosen.closestDeposit));
+            MovementHandler.GoTo(LocationModel.GetLocationByName(enemyChosen.closestDeposit));
         } else {
             Npc[] enemies = Npcs.all(x -> enemyChosen.enemyId.contains(x.getId()));
 
             if (enemies.length > 0)
                 EnemyHandler.Execute(enemyChosen, enemies);
             else
-                ManualMovementHandler.GoTo(ManualLocationModel.GetLocationByName(enemyChosen.location));
+                MovementHandler.GoTo(LocationModel.GetLocationByName(enemyChosen.location));
+        }
+    }
+
+    private void ExecuteConsumables() {
+        Player player = Players.self();
+        if (enableFood && maxHealth < Helper.PercentOf(useFoodPercentage, (int) maxHealth) && foodTimeout.elapsed(TimeUnit.SECONDS) > 5) {
+            WidgetItem food = ConsumableModel.GetFirstInInventoryOfType(ConsumableType.Health);
+            if (food != null) {
+                foodTimeout.reset().start();
+                InventoryHandler.Interact(food, 1);
+                return;
+            }
+        }
+
+        if (enableOverloads && overloadTimeout.elapsed(TimeUnit.SECONDS) > 5) {
+            WidgetItem overload = ConsumableModel.GetFirstInInventoryOfType(ConsumableType.Overload);
+            if (overload != null)
+                InventoryHandler.Interact(overload, 1);
+        }
+
+        if (enableAggression && aggressionTimeout.elapsed(TimeUnit.SECONDS) > 5) {
+            WidgetItem aggression = ConsumableModel.GetFirstInInventoryOfType(ConsumableType.Aggression);
+            if (aggression != null)
+                InventoryHandler.Interact(aggression, 1);
+        }
+
+        if (enablePrayerRenew && prayerTimeout.elapsed(TimeUnit.SECONDS) > 5) {
+//            if (usePrayerRenewPercentage) {
+                WidgetItem prayer = ConsumableModel.GetFirstInInventoryOfType(ConsumableType.Prayer);
+                if (prayer != null)
+                    InventoryHandler.Interact(prayer, 1);
+//            }
         }
     }
 
     @Override
     public void onPaint() {
-        ImGui.label("");
-        ImGui.label("MashCombat");
-        ImGui.label("");
-
         if (ImGui.beginTabBar("MainTabs")) {
             if (ImGui.beginTabItem("Main")) {
                 PaintMain();
@@ -76,6 +122,9 @@ public final class MashCombat extends Plugin {
     }
 
     private void PaintMain() {
+        ImGui.columns("##CombatMainColumns", 2, false);
+        ImGui.beginChild("##CombatMainFrame", true);
+
         if (!startRoutine) {
             comboSelected = ImGui.combo("Enemies##EnemySelectCombo", comboOptions, comboSelected);
             if (comboSelected != newComboSelected || dropsEnabled == null) {
@@ -90,7 +139,7 @@ public final class MashCombat extends Plugin {
         } else
             ImGui.label(MessageFormat.format("Currently hunting: {0}", enemyChosen.name));
 
-        ImGui.label("");
+        ImGui.newLine();
         ImGui.label(MessageFormat.format("Location: {0}", enemyChosen.location));
         ImGui.label(MessageFormat.format("Deposit: {0}", enemyChosen.closestDeposit));
         if (TeleportHandler.Get(enemyChosen.teleport) != null) {
@@ -99,15 +148,56 @@ public final class MashCombat extends Plugin {
 
 
         if (enemyChosen.requirements.size() > 0) {
-            ImGui.label("");
+            ImGui.newLine();
             ImGui.label("Requirements:");
             for (RequirementModel req : enemyChosen.requirements){
-                if (req.Type == "Level")
+                if (req.Type.equals("Level"))
                     ImGui.label(MessageFormat.format("{0} Lv{1}", req.Param1, req.ThresholdInt));
             }
         }
 
+        ImGui.newLine();
+
+        if (enemyChosen.requirements != null && RequirementHandler.LevelsMet(enemyChosen.requirements) || startRoutine) {
+            String toggleRoutineText = startRoutine ? "Stop Routine" : "Start Routine";
+            if (ImGui.button(toggleRoutineText))
+                startRoutine = !startRoutine;
+        } else
+            ImGui.label("Your level is too low to get to this enemy.");
+
+        ImGui.endChild();
+        ImGui.nextColumn();
+        ImGui.beginChild("##CombatSecondaryFrame", true);
+
+        if (ImGui.button("Set Current HP##CombatSetCurrentHPBtn")) {
+            maxHealth = (int) Players.self().getHealth();
+        }
+        ImGui.sameLine();
+        ImGui.beginChild("##SetMaxHPSizeWorkaround", 250, 19, false);
+        maxHealth = ImGui.intInput("%.##SetMapHPInput", maxHealth);
+        ImGui.endChild();
+
+        enableAggression = ImGui.checkbox("Aggression##CombatEnableAggressionCheckbox", enableAggression);
+        enableOverloads = ImGui.checkbox("Overloads##CombatEnableOverloadsCheckbox", enableOverloads);
+
+        // Prayer
+        enablePrayerUsage = ImGui.checkbox("Prayer##CombatEnablePrayerCheckbox", enablePrayerRenew);
+        enablePrayerRenew = ImGui.checkbox("Renew Prayer when below ##CombatEnablePrayerRenewCheckbox", enablePrayerRenew);
+        ImGui.sameLine();
+        ImGui.beginChild("##PrayerRenewInputExtremeWorkaround", 120, 19, false);
+        usePrayerRenewPercentage = ImGui.intInput("%.##PrayerRenewPercentageValue", usePrayerRenewPercentage);
+        ImGui.endChild();
+
+        // Food
+        enableFood = ImGui.checkbox("Use food when HP is below ##CombatEnableFoodCheckbox", enableFood);
+        ImGui.sameLine();
+        ImGui.beginChild("##FoodInputExtremeWorkaround", 120, 19, false);
+        useFoodPercentage = ImGui.intInput("%.##UseFoodPercentageValue", useFoodPercentage);
+        ImGui.endChild();
+
+        // Drops
         if (enemyChosen.drops.length > 0) {
+            ImGui.newLine();
             ImGui.label("Drops");
             int index = 0;
             for (Pair drop : enemyChosen.drops) {
@@ -116,14 +206,8 @@ public final class MashCombat extends Plugin {
             }
         }
 
-        ImGui.label("");
-
-        if (enemyChosen.requirements != null && RequirementHandler.LevelsMet(enemyChosen.requirements) || startRoutine) {
-            String toggleRoutineText = startRoutine ? "Stop Routine" : "Start Routine";
-            if (ImGui.button(toggleRoutineText))
-                startRoutine = !startRoutine;
-        } else
-            ImGui.label("Your level is too low to get to this enemy.");
+        ImGui.endChild();
+        ImGui.columns("", 1, false);
     }
 
     private void PaintDebug() {
@@ -158,7 +242,7 @@ public final class MashCombat extends Plugin {
         }
 
         if (Players.self() != null) {
-            ImGui.label("");
+            ImGui.newLine();
             ImGui.label(MessageFormat.format("AnimationId: {0}", Players.self().getAnimationId()));
             ImGui.label(MessageFormat.format("Adrenaline: {0} (Threshold: {1})", Players.self().getAdrenaline(), Players.self().getAdrenaline() < 0.2));
             ImGui.label(MessageFormat.format("Inventory is full: {0}", Inventory.isFull()));
@@ -167,7 +251,7 @@ public final class MashCombat extends Plugin {
                 ImGui.label(MessageFormat.format("Distance to Inside Stair: {0}", SceneObjects.all(x -> x.getId() == 6226)[0].getScenePosition().distance(Players.self().getScenePosition())));
             if (SceneObjects.all(x -> x.getId() == 2113).length > 0)
                 ImGui.label(MessageFormat.format("Distance to Outside Stair: {0}", SceneObjects.all(x -> x.getId() == 2113)[0].getScenePosition().distance(Players.self().getScenePosition())));
-            ImGui.label("");
+            ImGui.newLine();
             ImGui.label("Ores detected:");
 
             SceneObject[] ores = SceneObjects.all(x -> enemyChosen.enemyId.contains(x.getId()));

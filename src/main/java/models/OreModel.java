@@ -53,7 +53,10 @@ public class OreModel {
                 "Precious Gem",
                 "Banite Ore",
                 "Light Animica",
-                "Dark Animica"
+                "Dark Animica",
+                "Uncommon Gems",
+                "Common Gems",
+                "Gold ore"
         };
     }
 
@@ -227,7 +230,7 @@ public class OreModel {
                                 ));
                             }
                         },
-                        new String[] { "Ourania Battlefield Mine" },
+                        new String[] { "Ourania Battlefield Mine", "Burthorpe Mine (Center)" },
                         "Al Kharid Metal Bank",
                         LocationType.MetalBank
                 ));
@@ -328,7 +331,7 @@ public class OreModel {
                 ));
                 add(new OreModel(
                         15,
-                        new ArrayList<Integer>(Arrays.asList(113062, 113063, 113064)),
+                        new ArrayList<Integer>(Arrays.asList(113062, 113063, 113064, 113186, 113187)),
                         "Precious Gem",
                         new ArrayList<RequirementModel>() {
                             {
@@ -341,7 +344,7 @@ public class OreModel {
                                 ));
                             }
                         },
-                        new String[] { "Al Kharid Resource Dungeon" },
+                        new String[] { "Al Kharid Resource Dungeon", "Shilo Village Mine" },
                         "Al Kharid Bank",
                         LocationType.Bank
                 ));
@@ -401,6 +404,63 @@ public class OreModel {
                         new String[] { "Empty Throne Room Mine" },
                         "Al Kharid Metal Bank",
                         LocationType.MetalBank
+                ));
+                add(new OreModel(
+                        19,
+                        new ArrayList<Integer>(Arrays.asList(113047, 113048, 113049)),
+                        "Uncommon Gems",
+                        new ArrayList<RequirementModel>() {
+                            {
+                                add(new RequirementModel(
+                                        "Level",
+                                        "MINING",
+                                        20,
+                                        true,
+                                        ""
+                                ));
+                            }
+                        },
+                        new String[] { "Al Kharid Mining Site" },
+                        "Al Kharid Bank",
+                        LocationType.Bank
+                ));
+                add(new OreModel(
+                        20,
+                        new ArrayList<Integer>(Arrays.asList(113037, 113036)),
+                        "Common Gems",
+                        new ArrayList<RequirementModel>() {
+                            {
+                                add(new RequirementModel(
+                                        "Level",
+                                        "MINING",
+                                        1,
+                                        true,
+                                        ""
+                                ));
+                            }
+                        },
+                        new String[] { "Al Kharid Mining Site" },
+                        "Al Kharid Bank",
+                        LocationType.Bank
+                ));
+                add(new OreModel(
+                        21,
+                        new ArrayList<Integer>(Arrays.asList(113060, 113061, 113059)),
+                        "Gold ore",
+                        new ArrayList<RequirementModel>() {
+                            {
+                                add(new RequirementModel(
+                                        "Level",
+                                        "MINING",
+                                        40,
+                                        true,
+                                        ""
+                                ));
+                            }
+                        },
+                        new String[] { "Al Kharid Mining Site" },
+                        "Al Kharid Bank",
+                        LocationType.Bank
                 ));
             }
         };

@@ -4,6 +4,7 @@ import enums.LocationType;
 import helpers.Helper;
 import helpers.Log;
 import kraken.plugin.api.*;
+import models.LocationModel;
 import models.ManualLocationModel;
 import models.OreModel;
 import models.RequirementModel;
@@ -20,11 +21,11 @@ public final class MashMining extends Plugin {
             44797, 44795, 44793, 44791, 44789, 44787, 44785, 44783, 44781, 44779
     ));
     public static boolean withdrawOreBox = false;
-    public static ManualLocationModel defaultBank = ManualLocationModel.GetLocationByName("Burthorpe Bank");
+    public static LocationModel defaultBank = LocationModel.GetLocationByName("Burthorpe Bank");
     public static boolean startRoutine = false;
     private static OreModel oreChosen;
-    private static ManualLocationModel mineChosen;
-    private static ManualLocationModel depositChosen;
+    private static LocationModel mineChosen;
+    private static LocationModel depositChosen;
     private static int oreSelected = 0;
     private static int mineSelected = 0;
     private static int oldOreSelected = 0;
@@ -92,17 +93,20 @@ public final class MashMining extends Plugin {
                     return;
                 }
 
-                ManualMovementHandler.GoTo(depositChosen);
+                MovementHandler.GoTo(depositChosen);
             }
         } else {
             oreBoxIsFull = false;
             SceneObject[] ores = SceneObjects.all(x -> oreChosen.ObjectId.contains(x.getId()));
             boolean insideMine = mineChosen.Area.contains(Players.self().getGlobalPosition());
+            boolean closeEnough = false;
+            if (ores.length > 0)
+                closeEnough = ores[0].getGlobalPosition().distance(Players.self().getGlobalPosition()) < 20;
 
-            if (ores.length > 0 && insideMine)
+            if (ores.length > 0 && (insideMine || closeEnough))
                 MiningHandler.Execute(oreChosen, ores);
             else
-                ManualMovementHandler.GoTo(mineChosen);
+                MovementHandler.GoTo(mineChosen);
         }
     }
 
@@ -112,7 +116,7 @@ public final class MashMining extends Plugin {
             return;
         }
 
-        ManualMovementHandler.GoTo(defaultBank);
+        MovementHandler.GoTo(defaultBank);
     }
 
     public void FillOreBox() {
@@ -152,7 +156,7 @@ public final class MashMining extends Plugin {
             if (oreChosen == null || !oreChosen.Name.equals(OreModel.GetOreListToCombo()[oreSelected]))
                 oreChosen = OreModel.GetOreList().get(oreSelected);
 
-            String[] bankOptions = ManualLocationModel.GetLocationListByTypeToCombo(oreChosen.DepositType);
+            String[] bankOptions = LocationModel.GetLocationListByTypeToCombo(oreChosen.DepositType);
             // @TODO! Make this related to the mine and not the ore.
             if (oreSelected != oldOreSelected) {
                 depositSelected = Helper.GetIndexOf(bankOptions, oreChosen.ClosestDeposit);
@@ -161,11 +165,11 @@ public final class MashMining extends Plugin {
 
             mineSelected = ImGui.combo("Mine##MineSelectCombo", oreChosen.MineList, mineSelected);
             if (mineChosen == null || !mineChosen.Name.equals(oreChosen.MineList[mineSelected]))
-                mineChosen = ManualLocationModel.GetLocationByName(oreChosen.MineList[mineSelected]);
+                mineChosen = LocationModel.GetLocationByName(oreChosen.MineList[mineSelected]);
 
             if (bankOptions.length > 0) {
                 depositSelected = ImGui.combo("Deposit##DepositSelectCombo", bankOptions, depositSelected);
-                depositChosen = ManualLocationModel.GetLocationListByType(oreChosen.DepositType).get(depositSelected);
+                depositChosen = LocationModel.GetLocationListByType(oreChosen.DepositType).get(depositSelected);
             }
         } else {
             ImGui.label(MessageFormat.format("Currently mining: {0}", oreChosen.Name));
@@ -221,9 +225,9 @@ public final class MashMining extends Plugin {
     }
 
     private void PaintDebug() {
-        ImGui.label(MessageFormat.format("Current Inside Area: {0}", ManualMovementHandler.GetCurrentArea() != null));
-        if (ManualMovementHandler.GetCurrentArea() != null)
-            ImGui.label(MessageFormat.format("Current Inside Area Name: {0}", ManualMovementHandler.GetCurrentArea().Name));
+        ImGui.label(MessageFormat.format("Current Inside Area: {0}", MovementHandler.GetCurrentArea() != null));
+        if (MovementHandler.GetCurrentArea() != null)
+            ImGui.label(MessageFormat.format("Current Inside Area Name: {0}", MovementHandler.GetCurrentArea().Name));
 
         drawMineChosen = ImGui.checkbox("Draw mine path.", drawMineChosen);
         drawDepositChosen = ImGui.checkbox("Draw deposit path.", drawDepositChosen);

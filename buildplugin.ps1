@@ -1,7 +1,7 @@
-$PluginPath = "D:\AbyssDev\MashToolbox\"
-$PluginIniPath = "D:\AbyssDev\MashToolbox\src\main\resources\plugin.ini"
-$GradlewPath = "D:\AbyssDev\MashToolbox\gradlew"
-$GradlewConfig = "D:\AbyssDev\MashToolbox\settings.gradle"
+$PluginPath = "D:\AbyssDev\Mash\"
+$PluginIniPath = "D:\AbyssDev\Mash\src\main\resources\plugin.ini"
+$GradlewPath = "D:\AbyssDev\Mash\gradlew"
+$GradlewConfig = "D:\AbyssDev\Mash\settings.gradle"
 $Plugin = $args[0]
 
 Write-Host Building plugin $Plugin

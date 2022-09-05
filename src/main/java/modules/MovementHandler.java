@@ -1,5 +1,6 @@
 package modules;
 
+import abyss.plugin.api.teleport.Lodestones;
 import enums.LocationType;
 import helpers.Log;
 import kraken.plugin.api.Move;

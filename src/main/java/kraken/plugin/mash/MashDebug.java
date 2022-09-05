@@ -88,6 +88,12 @@ public class MashDebug extends Plugin {
                     ImGui.endTabItem();
                 }
 
+                if (ImGui.beginTabItem("StatusBar")) {
+                    ImGui.label("");
+                    PaintStatusBar();
+                    ImGui.endTabBar();
+                }
+
                 if (ImGui.beginTabItem("Equipment")) {
                     ImGui.label("");
                     PaintEquipment();
@@ -121,6 +127,14 @@ public class MashDebug extends Plugin {
                 ImGui.endTabBar();
             }
         }
+    }
+
+    private void PaintStatusBar() {
+        Player player = Players.self();
+
+        ImGui.beginChild("##StatusBarFrame", true);
+
+        ImGui.endChild();
     }
 
     private void PaintEquipment() {

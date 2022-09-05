@@ -63,8 +63,8 @@ public class EnemyModel {
                         1,
                         new ArrayList<Integer>(Arrays.asList(1626, 1627, 1623)),
                         "Turoth",
-                        "Fremmenik Slayer Dungeon",
-                        "Fremmenik Province",
+                        "Fremennik Slayer Dungeon",
+                        "Fremennik Province",
                         new ArrayList<RequirementModel>(),
                         "Burthorpe Bank",
                         new Pair[] {

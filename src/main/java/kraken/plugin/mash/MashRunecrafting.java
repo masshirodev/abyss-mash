@@ -2,6 +2,7 @@ package kraken.plugin.mash;
 
 import abyss.plugin.api.input.InputHelper;
 import abyss.plugin.api.variables.VariableManager;
+import abyss.plugin.api.world.WorldTile;
 import com.google.common.base.Stopwatch;
 import enums.LocationType;
 import helpers.Helper;
@@ -30,6 +31,8 @@ public final class MashRunecrafting extends Plugin {
     private static int runeSelected = 0;
     private static int presetSelected = 1;
     private static boolean enableWildSwordUsage = true;
+    private static Vector3i swordUsagePosition;
+    private static Stopwatch swordUsageTimeout = Stopwatch.createUnstarted();
     private static final int repairNpcId = 2262;
     private static final ArrayList<Integer> mageIds = new ArrayList<Integer>(Arrays.asList(24241, 24242));
     private static final ArrayList<Integer> creatureIds = new ArrayList<Integer>(Arrays.asList(2264, 2263));
@@ -56,7 +59,7 @@ public final class MashRunecrafting extends Plugin {
 
     @Override
     public boolean onLoaded(PluginContext pluginContext) {
-        pluginContext.setName("MashRunecrafting v1.04092022b");
+        pluginContext.setName("MashRunecrafting v1.04092022c");
         return true;
     }
 
@@ -90,6 +93,10 @@ public final class MashRunecrafting extends Plugin {
             Log.Information("Inventory is not full.");
             if (BankHandler.BankNearby(LocationType.Bank)) {
                 Log.Information("A bank was found nearby.");
+                enableWildSwordUsage = true;
+                swordUsageTimeout = Stopwatch.createUnstarted();
+                swordUsagePosition = null;
+
 //                BankHandler.WithdrawFirst(x -> oreBoxIds.contains(x.getId()), 1);
                 BankHandler.WithdrawPreset(presetSelected);
                 ManualMovementHandler.movementIndex = 1;
@@ -103,9 +110,20 @@ public final class MashRunecrafting extends Plugin {
                 Log.Information(MessageFormat.format("Has Sword: {0}", CheckForWildernessSword()));
 
                 if (altar != null && CheckForWildernessSword()) {
+                    if (swordUsageTimeout.elapsed(TimeUnit.SECONDS) > 5 && swordUsagePosition.distance(Players.self().getGlobalPosition()) < 20) {
+                        Log.Information("[FAILSAFE] Player has not teleported away in 10 seconds, re-enabling the wilderness sword.");
+                        enableWildSwordUsage = true;
+                        swordUsageTimeout = Stopwatch.createUnstarted();
+                        swordUsagePosition = null;
+                    }
+
                     if (enableWildSwordUsage && !Players.self().isAnimationPlaying()) {
-                        enableWildSwordUsage = false;
                         Log.Information("Requirements met, using the wilderness sword.");
+                        if (!swordUsageTimeout.isRunning())
+                            swordUsageTimeout.start();
+
+                        swordUsagePosition = Players.self().getGlobalPosition();
+                        enableWildSwordUsage = false;
                         Helper.Wait(1000);
                         UseWildernessSword();
                     }
@@ -129,7 +147,9 @@ public final class MashRunecrafting extends Plugin {
                 return;
         }
 
-        enableWildSwordUsage = true;
+        if (Widgets.isOpen(382)) {
+            Actions.menu(Actions.MENU_EXECUTE_DIALOGUE, 0, -1, 25034760, 0);
+        }
 
         Npc mage = Npcs.closest(x -> mageIds.contains(x.getId()) && x.getGlobalPosition().distance(Players.self().getGlobalPosition()) < 15);
 
@@ -375,7 +395,7 @@ public final class MashRunecrafting extends Plugin {
         ImGui.label("");
 
 //        if (ImGui.button("Debug")) {
-//            UseWildernessSword();
+//            Actions.menu(Actions.MENU_EXECUTE_DIALOGUE, 0, -1, 25034760, 0);
 //        }
 //
 //        if (ImGui.button("Debug2")) {

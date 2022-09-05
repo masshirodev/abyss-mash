@@ -32,4 +32,8 @@ public class Helper {
     public static int RandomInt(int min, int max) {
         return new Random().nextInt((max - min) + 1) + min;
     }
+
+    public static int PercentOf(int percent, int value) {
+        return (percent / 100) * value;
+    }
 }

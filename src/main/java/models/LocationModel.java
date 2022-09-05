@@ -113,7 +113,7 @@ public class LocationModel {
                             }
                         },
                         "Burthorpe",
-                        100,
+                        300,
                         new ArrayList<RequirementModel>(),
                         new WorldTile(2243,4541,0),
                         new WorldTile(2300,4484,0),
@@ -130,7 +130,7 @@ public class LocationModel {
                             }
                         },
                         "Burthorpe",
-                        100,
+                        300,
                         new ArrayList<RequirementModel>(),
                         new WorldTile(2875, 3510, 0),
                         new WorldTile(2890, 3494, 0),
@@ -148,7 +148,7 @@ public class LocationModel {
                             }
                         },
                         "Falador",
-                        100,
+                        300,
                         new ArrayList<RequirementModel>(),
                         new WorldTile(2934, 3340, 0),
                         new WorldTile(2922, 3329, 0),
@@ -166,7 +166,7 @@ public class LocationModel {
                             }
                         },
                         "Varrock",
-                        100,
+                        300,
                         new ArrayList<RequirementModel>(),
                         new WorldTile(3172, 3383, 0),
                         new WorldTile(3185, 3364, 0),
@@ -184,7 +184,7 @@ public class LocationModel {
                             }
                         },
                         "Varrock",
-                        100,
+                        300,
                         new ArrayList<RequirementModel>(),
                         new WorldTile(3279, 3373, 0),
                         new WorldTile(3296, 3354, 0),
@@ -202,7 +202,7 @@ public class LocationModel {
                             }
                         },
                         "Ardougne",
-                        100,
+                        300,
                         new ArrayList<RequirementModel>(),
                         new WorldTile(2468, 3257, 0),
                         new WorldTile(2479, 3247, 0),
@@ -220,7 +220,7 @@ public class LocationModel {
                             }
                         },
                         "Falador",
-                        100,
+                        300,
                         new ArrayList<RequirementModel>() {
                             {
                                 add(new RequirementModel(
@@ -248,7 +248,7 @@ public class LocationModel {
                             }
                         },
                         "Falador",
-                        100,
+                        300,
                         new ArrayList<RequirementModel>() {
                             {
                                 add(new RequirementModel(
@@ -283,7 +283,7 @@ public class LocationModel {
                             }
                         },
                         "Canifis",
-                        100,
+                        300,
                         new ArrayList<RequirementModel>(),
                         new WorldTile(3683, 3410, 0),
                         new WorldTile(3694, 3388, 0),
@@ -301,7 +301,7 @@ public class LocationModel {
                             }
                         },
                         "Canifis",
-                        100,
+                        300,
                         new ArrayList<RequirementModel>() {
                             {
                                 add(new RequirementModel(
@@ -329,7 +329,7 @@ public class LocationModel {
                             }
                         },
                         "Fremennik Province",
-                        100,
+                        300,
                         new ArrayList<RequirementModel>(),
                         new WorldTile(2708, 3880, 0),
                         new WorldTile(2748, 3869, 0),
@@ -347,7 +347,7 @@ public class LocationModel {
                             }
                         },
                         "Anachronia",
-                        100,
+                        300,
                         new ArrayList<RequirementModel>(),
                         new WorldTile(5335, 2263, 0),
                         new WorldTile(5347, 2247, 0),
@@ -365,7 +365,7 @@ public class LocationModel {
                             }
                         },
                         "Varrock",
-                        100,
+                        300,
                         new ArrayList<RequirementModel>(),
                         new WorldTile(2871, 12650, 0),
                         new WorldTile(2883, 12629, 0),
@@ -384,7 +384,7 @@ public class LocationModel {
                             }
                         },
                         "Falador",
-                        100,
+                        300,
                         new ArrayList<RequirementModel>(),
                         new WorldTile(3032, 3350, 0),
                         new WorldTile(3066, 3330, 0),
@@ -403,7 +403,7 @@ public class LocationModel {
                             }
                         },
                         "Varrock",
-                        100,
+                        300,
                         new ArrayList<RequirementModel>(),
                         new WorldTile(3032, 3350, 0),
                         new WorldTile(3066, 3330, 0),
@@ -421,7 +421,7 @@ public class LocationModel {
                             }
                         },
                         "Varrock",
-                        100,
+                        300,
                         new ArrayList<RequirementModel>(),
                         new WorldTile(3153, 3502, 0),
                         new WorldTile(3176, 3480, 0),
@@ -439,7 +439,7 @@ public class LocationModel {
                             }
                         },
                         "Burthorpe",
-                        100,
+                        300,
                         new ArrayList<RequirementModel>(),
                         new WorldTile(2886, 3539, 0),
                         new WorldTile(2892, 3533, 0),
@@ -458,7 +458,7 @@ public class LocationModel {
                             }
                         },
                         "Falador",
-                        100,
+                        300,
                         new ArrayList<RequirementModel>(),
                         new WorldTile(2948, 3307, 0),
                         new WorldTile(2988, 3274, 0),
@@ -476,7 +476,7 @@ public class LocationModel {
                             }
                         },
                         "Al Kharid",
-                        100,
+                        300,
                         new ArrayList<RequirementModel>(),
                         new WorldTile(3290, 3322, 0),
                         new WorldTile(3309, 3282, 0),
@@ -494,7 +494,7 @@ public class LocationModel {
                             }
                         },
                         "Falador",
-                        100,
+                        300,
                         new ArrayList<RequirementModel>(),
                         new WorldTile(3007, 3362, 0),
                         new WorldTile(3023, 3351, 0),
@@ -512,7 +512,7 @@ public class LocationModel {
                             }
                         },
                         "Al Kharid",
-                        100,
+                        300,
                         new ArrayList<RequirementModel>(),
                         new WorldTile(3262, 3189, 0),
                         new WorldTile(3277, 3162, 0),
@@ -530,7 +530,7 @@ public class LocationModel {
                             }
                         },
                         "Al Kharid",
-                        100,
+                        300,
                         new ArrayList<RequirementModel>(),
                         new WorldTile(3281, 3194, 0),
                         new WorldTile(3290, 3184, 0),
@@ -548,7 +548,7 @@ public class LocationModel {
                             }
                         },
                         "Anachronia",
-                        100,
+                        300,
                         new ArrayList<RequirementModel>(),
                         new WorldTile(5461, 2352, 0),
                         new WorldTile(5470, 2333, 0),
@@ -566,7 +566,7 @@ public class LocationModel {
                             }
                         },
                         "Varrock",
-                        100,
+                        300,
                         new ArrayList<RequirementModel>(),
                         null,
                         null,
@@ -585,7 +585,7 @@ public class LocationModel {
                             }
                         },
                         "Varrock",
-                        100,
+                        300,
                         new ArrayList<RequirementModel>(),
                         null,
                         null,
@@ -603,7 +603,7 @@ public class LocationModel {
                             }
                         },
                         "Burthorpe",
-                        100,
+                        300,
                         new ArrayList<RequirementModel>(),
                         null,
                         null,
@@ -621,7 +621,7 @@ public class LocationModel {
                             }
                         },
                         "Karamja",
-                        100,
+                        300,
                         new ArrayList<RequirementModel>(),
                         null,
                         null,
@@ -639,7 +639,7 @@ public class LocationModel {
                             }
                         },
                         "Karamja",
-                        100,
+                        300,
                         new ArrayList<RequirementModel>(),
                         null,
                         null,
@@ -657,7 +657,7 @@ public class LocationModel {
                             }
                         },
                         "Karamja",
-                        100,
+                        300,
                         new ArrayList<RequirementModel>() {
                             {
                                 add(new RequirementModel(
@@ -685,7 +685,7 @@ public class LocationModel {
                             }
                         },
                         "Karamja",
-                        100,
+                        300,
                         new ArrayList<RequirementModel>() {
                             {
                                 add(new RequirementModel(
@@ -714,7 +714,7 @@ public class LocationModel {
                             }
                         },
                         "Lumbridge",
-                        100,
+                        300,
                         new ArrayList<RequirementModel>(),
                         null,
                         null,
@@ -732,7 +732,7 @@ public class LocationModel {
                             }
                         },
                         "Edgeville",
-                        100,
+                        300,
                         new ArrayList<RequirementModel>(),
                         null,
                         null,
@@ -750,7 +750,7 @@ public class LocationModel {
                             }
                         },
                         "Edgeville",
-                        100,
+                        300,
                         new ArrayList<RequirementModel>(),
                         new WorldTile(3025, 4846, 0),
                         new WorldTile(3055, 4817, 0),
@@ -768,11 +768,30 @@ public class LocationModel {
                             }
                         },
                         "Edgeville",
-                        100,
+                        300,
                         new ArrayList<RequirementModel>(),
                         new WorldTile(3028, 9781, 0),
                         new WorldTile(3048, 9757, 0),
                         null
+                ));
+
+                // Untested
+                add(new LocationModel(
+                        35,
+                        "Fremennik Slayer Dungeon",
+                        new ArrayList<LocationType>() {
+                            {
+                                add(LocationType.Battle);
+                                add(LocationType.Slayer);
+                                add(LocationType.Disconnected);
+                            }
+                        },
+                        "Fremennik Province",
+                        300,
+                        new ArrayList<RequirementModel>(),
+                        null,
+                        null,
+                        new WorldTile(2726, 9973, 0)
                 ));
 
 //                add(new LocationModel(

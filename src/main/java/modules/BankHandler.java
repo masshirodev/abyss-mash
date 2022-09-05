@@ -1,6 +1,7 @@
 package modules;
 
 import enums.LocationType;
+import helpers.Helper;
 import helpers.Log;
 import kraken.plugin.api.*;
 import org.jetbrains.annotations.Nullable;
@@ -69,6 +70,7 @@ public class BankHandler {
                 add(42378);
                 add(496);
                 add(76274);
+                add(3418);
             }
         };
     }
@@ -223,6 +225,7 @@ public class BankHandler {
                 else
                     bank.interact(Actions.MENU_EXECUTE_OBJECT1);
 
+                Helper.Wait(1000);
                 return;
             }
 
