@@ -24,11 +24,17 @@ public class BankHandler {
     public static boolean BankNearby(LocationType option) {
         switch (option) {
             case Bank:
-                return Npcs
-                    .closest(x ->
-                        GetBankIds().contains(x.getId()) &&
-                        x.getGlobalPosition().distance(Players.self().getGlobalPosition()) < 30)
-                    != null;
+                boolean npcFound = Npcs
+                        .closest(x ->
+                                GetBankIds().contains(x.getId()) &&
+                                        x.getGlobalPosition().distance(Players.self().getGlobalPosition()) < 30)
+                        != null;
+                boolean objectFound = SceneObjects
+                        .closest(x ->
+                                GetBankIds().contains(x.getId()) &&
+                                        x.getGlobalPosition().distance(Players.self().getGlobalPosition()) < 30)
+                        != null;
+                return objectFound || npcFound;
             case MetalBank:
                 return SceneObjects
                     .closest(x ->

@@ -1712,6 +1712,484 @@ public class ManualLocationModel {
                         new ArrayList<ExitPathModel>()
                 ));
 
+                add(new ManualLocationModel(
+                        35,
+                        "Default",
+                        "Draynor Divination Pool",
+                        new ArrayList<LocationType>() {
+                            {
+                                add(LocationType.Divination);
+                                add(LocationType.OpenWorld);
+                            }
+                        },
+                        "Draynor",
+                        100,
+                        new ArrayList<RequirementModel>(),
+                        new WorldTile(0, 0, 0),
+                        new WorldTile(0, 0, 0),
+                        new ArrayList<PathModel>() {
+                            {
+                                add(new PathModel(
+                                        1,
+                                        new ArrayList<WorldTile>() {
+                                            {
+                                                add(new WorldTile(3105, 3298, 0));
+                                                add(new WorldTile(3106, 3259, 0));
+                                                add(new WorldTile(3106, 3259, 0));
+                                                add(new WorldTile(3122, 3217, 0));
+                                            }
+                                        },
+                                        new ArrayList<RequirementModel>()
+                                ));
+                            }
+                        },
+                        new ArrayList<CustomPathModel>(),
+                        new ArrayList<ExitPathModel>()
+                ));
+
+                add(new ManualLocationModel(
+                        36,
+                        "Default",
+                        "Falador Northeast Divination Pool",
+                        new ArrayList<LocationType>() {
+                            {
+                                add(LocationType.Divination);
+                                add(LocationType.OpenWorld);
+                            }
+                        },
+                        "Falador",
+                        100,
+                        new ArrayList<RequirementModel>(),
+                        new WorldTile(0, 0, 0),
+                        new WorldTile(0, 0, 0),
+                        new ArrayList<PathModel>() {
+                            {
+                                add(new PathModel(
+                                        1,
+                                        new ArrayList<WorldTile>() {
+                                            {
+                                                add(new WorldTile(2967, 3403, 0));
+                                                add(new WorldTile(2989, 3403, 0));
+                                                add(new WorldTile(2989, 3403, 0));
+                                            }
+                                        },
+                                        new ArrayList<RequirementModel>()
+                                ));
+                            }
+                        },
+                        new ArrayList<CustomPathModel>(),
+                        new ArrayList<ExitPathModel>()
+                ));
+
+                add(new ManualLocationModel(
+                        37,
+                        "Default",
+                        "Varrock Southeast Divination Pool",
+                        new ArrayList<LocationType>() {
+                            {
+                                add(LocationType.Divination);
+                                add(LocationType.OpenWorld);
+                            }
+                        },
+                        "Varrock",
+                        100,
+                        new ArrayList<RequirementModel>(),
+                        new WorldTile(0, 0, 0),
+                        new WorldTile(0, 0, 0),
+                        new ArrayList<PathModel>() {
+                            {
+                                add(new PathModel(
+                                        1,
+                                        new ArrayList<WorldTile>() {
+                                            {
+                                                add(new WorldTile(3214, 3376, 0));
+                                                add(new WorldTile(3239, 3376, 0));
+                                                add(new WorldTile(3262, 3373, 0));
+                                                add(new WorldTile(3285, 3373, 0));
+                                                add(new WorldTile(3298, 3393, 0));
+                                            }
+                                        },
+                                        new ArrayList<RequirementModel>()
+                                ));
+                            }
+                        },
+                        new ArrayList<CustomPathModel>(),
+                        new ArrayList<ExitPathModel>()
+                ));
+
+                add(new ManualLocationModel(
+                        38,
+                        "Default",
+                        "aaaaaaaaaaaaaaaaaa",
+                        new ArrayList<LocationType>() {
+                            {
+                                add(LocationType.Divination);
+                                add(LocationType.OpenWorld);
+                            }
+                        },
+                        "aaaaaaaaaaaaaaa",
+                        100,
+                        new ArrayList<RequirementModel>(),
+                        new WorldTile(0, 0, 0),
+                        new WorldTile(0, 0, 0),
+                        new ArrayList<PathModel>() {
+                            {
+                                add(new PathModel(
+                                        1,
+                                        new ArrayList<WorldTile>() {
+                                            {
+                                            }
+                                        },
+                                        new ArrayList<RequirementModel>()
+                                ));
+                            }
+                        },
+                        new ArrayList<CustomPathModel>(),
+                        new ArrayList<ExitPathModel>()
+                ));
+
+                add(new ManualLocationModel(
+                        39,
+                        "Default",
+                        "Sorcerer's Tower Divination Pool",
+                        new ArrayList<LocationType>() {
+                            {
+                                add(LocationType.Divination);
+                                add(LocationType.OpenWorld);
+                            }
+                        },
+                        "Catherby",
+                        100,
+                        new ArrayList<RequirementModel>(),
+                        new WorldTile(0, 0, 0),
+                        new WorldTile(0, 0, 0),
+                        new ArrayList<PathModel>() {
+                            {
+                                add(new PathModel(
+                                        1,
+                                        new ArrayList<WorldTile>() {
+                                            {
+                                                add(new WorldTile(2811, 3449, 0));
+                                                add(new WorldTile(2779, 3440, 0));
+                                                add(new WorldTile(2748, 3431, 0));
+                                                add(new WorldTile(2735, 3417, 0));
+                                            }
+                                        },
+                                        new ArrayList<RequirementModel>()
+                                ));
+                            }
+                        },
+                        new ArrayList<CustomPathModel>(),
+                        new ArrayList<ExitPathModel>()
+                ));
+
+                add(new ManualLocationModel(
+                        40,
+                        "Default",
+                        "Rellekka Southeast Divination Pool",
+                        new ArrayList<LocationType>() {
+                            {
+                                add(LocationType.Divination);
+                                add(LocationType.OpenWorld);
+                            }
+                        },
+                        "Fremennik Province",
+                        100,
+                        new ArrayList<RequirementModel>(),
+                        new WorldTile(0, 0, 0),
+                        new WorldTile(0, 0, 0),
+                        new ArrayList<PathModel>() {
+                            {
+                                add(new PathModel(
+                                        1,
+                                        new ArrayList<WorldTile>() {
+                                            {
+                                                add(new WorldTile(2712, 3677, 0));
+                                                add(new WorldTile(2736, 3654, 0));
+                                                add(new WorldTile(2752, 3624, 0));
+                                                add(new WorldTile(2765, 3599, 0));
+                                            }
+                                        },
+                                        new ArrayList<RequirementModel>()
+                                ));
+                            }
+                        },
+                        new ArrayList<CustomPathModel>(),
+                        new ArrayList<ExitPathModel>()
+                ));
+
+                add(new ManualLocationModel(
+                        41,
+                        "Default",
+                        "Karamja Divination Pool",
+                        new ArrayList<LocationType>() {
+                            {
+                                add(LocationType.Divination);
+                                add(LocationType.OpenWorld);
+                            }
+                        },
+                        "Karamja",
+                        100,
+                        new ArrayList<RequirementModel>(),
+                        new WorldTile(0, 0, 0),
+                        new WorldTile(0, 0, 0),
+                        new ArrayList<PathModel>() {
+                            {
+                                add(new PathModel(
+                                        1,
+                                        new ArrayList<WorldTile>() {
+                                            {
+                                                add(new WorldTile(2762, 3148, 0));
+                                                add(new WorldTile(2787, 3122, 0));
+                                                add(new WorldTile(2816, 3106, 0));
+                                                add(new WorldTile(2844, 3085, 0));
+                                                add(new WorldTile(2844, 3085, 0));
+                                                add(new WorldTile(2887, 3052, 0));
+                                            }
+                                        },
+                                        new ArrayList<RequirementModel>()
+                                ));
+                            }
+                        },
+                        new ArrayList<CustomPathModel>(),
+                        new ArrayList<ExitPathModel>()
+                ));
+
+                add(new ManualLocationModel(
+                        42,
+                        "Default",
+                        "Oo'glog Divination Pool",
+                        new ArrayList<LocationType>() {
+                            {
+                                add(LocationType.Divination);
+                                add(LocationType.OpenWorld);
+                            }
+                        },
+                        "Oo'glog",
+                        100,
+                        new ArrayList<RequirementModel>(),
+                        new WorldTile(0, 0, 0),
+                        new WorldTile(0, 0, 0),
+                        new ArrayList<PathModel>() {
+                            {
+                                add(new PathModel(
+                                        1,
+                                        new ArrayList<WorldTile>() {
+                                            {
+                                                add(new WorldTile(2532, 2871, 0));
+                                                add(new WorldTile(2504, 2872, 0));
+                                                add(new WorldTile(2475, 2873, 0));
+                                                add(new WorldTile(2448, 2873, 0));
+                                                add(new WorldTile(2426, 2865, 0));
+                                            }
+                                        },
+                                        new ArrayList<RequirementModel>()
+                                ));
+                            }
+                        },
+                        new ArrayList<CustomPathModel>(),
+                        new ArrayList<ExitPathModel>()
+                ));
+
+                add(new ManualLocationModel(
+                        43,
+                        "Default",
+                        "Canifis Divination Pool",
+                        new ArrayList<LocationType>() {
+                            {
+                                add(LocationType.Divination);
+                                add(LocationType.OpenWorld);
+                            }
+                        },
+                        "Canifis",
+                        100,
+                        new ArrayList<RequirementModel>(),
+                        new WorldTile(0, 0, 0),
+                        new WorldTile(0, 0, 0),
+                        new ArrayList<PathModel>() {
+                            {
+                                add(new PathModel(
+                                        1,
+                                        new ArrayList<WorldTile>() {
+                                            {
+                                                add(new WorldTile(3517, 3515, 0));
+                                                add(new WorldTile(3502, 3534, 0));
+                                                add(new WorldTile(3472, 3540, 0));
+                                            }
+                                        },
+                                        new ArrayList<RequirementModel>()
+                                ));
+                            }
+                        },
+                        new ArrayList<CustomPathModel>(),
+                        new ArrayList<ExitPathModel>()
+                ));
+
+                add(new ManualLocationModel(
+                        44,
+                        "Default",
+                        "Mage Training Area's Divination Pool",
+                        new ArrayList<LocationType>() {
+                            {
+                                add(LocationType.Divination);
+                                add(LocationType.OpenWorld);
+                            }
+                        },
+                        "Varrock",
+                        100,
+                        new ArrayList<RequirementModel>(),
+                        new WorldTile(0, 0, 0),
+                        new WorldTile(0, 0, 0),
+                        new ArrayList<PathModel>() {
+                            {
+                                add(new PathModel(
+                                        1,
+                                        new ArrayList<WorldTile>() {
+                                            {
+                                                add(new WorldTile(3214, 3376, 0));
+                                                add(new WorldTile(3240, 3375, 0));
+                                                add(new WorldTile(3240, 3375, 0));
+                                                add(new WorldTile(3300, 3359, 0));
+                                                add(new WorldTile(3329, 3354, 0));
+                                                add(new WorldTile(3349, 3333, 0));
+                                                add(new WorldTile(3383, 3330, 0));
+                                                add(new WorldTile(3399, 3310, 0));
+                                                add(new WorldTile(3403, 3297, 0));
+                                            }
+                                        },
+                                        new ArrayList<RequirementModel>()
+                                ));
+                            }
+                        },
+                        new ArrayList<CustomPathModel>(),
+                        new ArrayList<ExitPathModel>()
+                ));
+
+                add(new ManualLocationModel(
+                        45,
+                        "Default",
+                        "Menaphos Divination Pool",
+                        new ArrayList<LocationType>() {
+                            {
+                                add(LocationType.Divination);
+                                add(LocationType.OpenWorld);
+                            }
+                        },
+                        "Menaphos",
+                        100,
+                        new ArrayList<RequirementModel>(),
+                        new WorldTile(0, 0, 0),
+                        new WorldTile(0, 0, 0),
+                        new ArrayList<PathModel>() {
+                            {
+                                add(new PathModel(
+                                        1,
+                                        new ArrayList<WorldTile>() {
+                                            {
+                                                add(new WorldTile(3216, 2716, 0));
+                                                add(new WorldTile(3241, 2729, 0));
+                                                add(new WorldTile(3266, 2729, 0));
+                                                add(new WorldTile(3278, 2713, 0));
+                                                add(new WorldTile(3301, 2693, 0));
+                                                add(new WorldTile(3306, 2666, 0));
+
+                                            }
+                                        },
+                                        new ArrayList<RequirementModel>()
+                                ));
+                            }
+                        },
+                        new ArrayList<CustomPathModel>() {
+                            {
+                                // Npc Door
+                                add(new CustomPathModel(
+                                        1,
+                                        1,
+                                        "NpcInteract",
+                                        Actions.MENU_EXECUTE_NPC2,
+                                        new ArrayList<Integer>(Arrays.asList(24666)),
+                                        2,
+                                        2
+
+                                ));
+                            }
+                        },
+                        new ArrayList<ExitPathModel>()
+                ));
+
+                add(new ManualLocationModel(
+                        46,
+                        "Default",
+                        "Tirannwn Lodestone",
+                        new ArrayList<LocationType>() {
+                            {
+                                add(LocationType.OpenWorld);
+                            }
+                        },
+                        "Tirannwn",
+                        100,
+                        new ArrayList<RequirementModel>(),
+                        new WorldTile(0, 0, 0),
+                        new WorldTile(0, 0, 0),
+                        new ArrayList<PathModel>() {
+                            {
+                                add(new PathModel(
+                                        1,
+                                        new ArrayList<WorldTile>() {
+                                            {
+                                                add(new WorldTile(2254, 3149, 0));
+                                            }
+                                        },
+                                        new ArrayList<RequirementModel>()
+                                ));
+                            }
+                        },
+                        new ArrayList<CustomPathModel>(),
+                        new ArrayList<ExitPathModel>()
+                ));
+
+                add(new ManualLocationModel(
+                        47,
+                        "Default",
+                        "Tirannwn Divination Pool",
+                        new ArrayList<LocationType>() {
+                            {
+                                add(LocationType.Divination);
+                                add(LocationType.OpenWorld);
+                            }
+                        },
+                        "Yanille",
+                        100,
+                        new ArrayList<RequirementModel>(),
+                        new WorldTile(0, 0, 0),
+                        new WorldTile(0, 0, 0),
+                        new ArrayList<PathModel>() {
+                            {
+                                add(new PathModel(
+                                        1,
+                                        new ArrayList<WorldTile>() {
+                                            {
+                                                add(new WorldTile(2529, 3094, 0));
+                                                add(new WorldTile(2500, 3094, 0));
+                                                add(new WorldTile(2474, 3081, 0));
+                                                add(new WorldTile(2450, 3062, 0));
+                                                add(new WorldTile(2423, 3052, 0));
+                                                add(new WorldTile(2394, 3038, 0));
+                                                add(new WorldTile(2365, 3051, 0));
+                                                add(new WorldTile(2339, 3065, 0));
+                                                add(new WorldTile(2309, 3066, 0));
+                                                add(new WorldTile(2286, 3059, 0));
+                                                add(new WorldTile(2283, 3052, 0));
+                                            }
+                                        },
+                                        new ArrayList<RequirementModel>()
+                                ));
+                            }
+                        },
+                        new ArrayList<CustomPathModel>(),
+                        new ArrayList<ExitPathModel>()
+                ));
+
 //                add(new LocationModel(
 //                        000000000000,
 //                        "Default",

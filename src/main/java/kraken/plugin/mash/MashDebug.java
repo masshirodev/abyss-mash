@@ -1,5 +1,7 @@
 package kraken.plugin.mash;
 
+import enums.World;
+import helpers.Engine;
 import helpers.Helper;
 import helpers.Log;
 import kraken.plugin.api.*;
@@ -189,7 +191,7 @@ public class MashDebug extends Plugin {
 
         if (inventory.length > 0) {
             for (int i = 0; i < inventory.length; i++) {
-                ImGui.label(inventory[i].getName());
+                ImGui.label(MessageFormat.format("{0} - {1}", inventory[i].getId(), inventory[i].getName()));
                 ImGui.sameLine();
                 if (ImGui.button(MessageFormat.format("Set##SetWidgetItemFromList{0}{1}", i, inventory[i].getId()))) {
                     widgetItem = inventory[i];
@@ -369,6 +371,12 @@ public class MashDebug extends Plugin {
         if (ImGui.button(dRoutText)) {
             debugRoutine = ! debugRoutine;
         }
+
+        if (ImGui.button("Debug - swap world")) {
+            boolean isF2P = World.IsF2P(Client.getWorld());
+            Engine.SwapWorld(World.GetRandomWorld(isF2P ? WorldType.F2P : WorldType.P2P));
+        }
+
 
         if (ImGui.button("Debug - interact")) {
             SceneObject[] forge = SceneObjects.all(x -> x.getId() == 120050);

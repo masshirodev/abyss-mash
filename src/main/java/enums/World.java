@@ -3,6 +3,10 @@ package enums;
 import kraken.plugin.api.WorldType;
 
 import java.text.MessageFormat;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Random;
 
 public enum World {
     WORLD1(WorldType.P2P),
@@ -265,6 +269,18 @@ public enum World {
     WORLD260(WorldType.P2P);
 
     private final WorldType value;
+    private static final List<World> VALUES =
+            Collections.unmodifiableList(Arrays.asList(values()));
+    private static final int SIZE = VALUES.size();
+    private static final Random RANDOM = new Random();
+
+    public static World GetRandomWorld(WorldType type)  {
+        World result = VALUES.get(RANDOM.nextInt(SIZE));
+        if (result.value != type)
+            result = GetRandomWorld(type);
+
+        return result;
+    }
 
     World(final WorldType newValue) {
         value = newValue;

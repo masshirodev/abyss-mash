@@ -2,9 +2,10 @@ package kraken.plugin.mash;
 
 import abyss.plugin.api.input.InputHelper;
 import abyss.plugin.api.variables.VariableManager;
-import abyss.plugin.api.world.WorldTile;
 import com.google.common.base.Stopwatch;
 import enums.LocationType;
+import enums.World;
+import helpers.Engine;
 import helpers.Helper;
 import helpers.Log;
 import helpers.Skills;
@@ -53,13 +54,14 @@ public final class MashRunecrafting extends Plugin {
     private static SceneObject innerEntrance;
     private static ArrayList<Integer> innerEntranceBlackList = new ArrayList<>();
     private static Stopwatch innerEntranceTimeout = Stopwatch.createUnstarted();
+    private static boolean swapWorlds = false;
 
     public MashRunecrafting() {
     }
 
     @Override
     public boolean onLoaded(PluginContext pluginContext) {
-        pluginContext.setName("MashRunecrafting v1.04092022c");
+        pluginContext.setName("MashRunecrafting v1.05092022b");
         return true;
     }
 
@@ -88,6 +90,22 @@ public final class MashRunecrafting extends Plugin {
 
     public void Routine() {
         Player player = Players.self();
+
+        // RIP
+        SceneObject deathHourglass = SceneObjects.closest(x -> x.getId() == 96782);
+
+        if (deathHourglass != null) {
+            Log.Information("Am I... Dead!?!? This is so sad, despacito, play Country Roads.");
+            deathHourglass.interact(Actions.MENU_EXECUTE_OBJECT1);
+            swapWorlds = true;
+            return;
+        }
+
+        if (swapWorlds) {
+            boolean isF2P = World.IsF2P(Client.getWorld());
+            Engine.SwapWorld(World.GetRandomWorld(isF2P ? WorldType.F2P : WorldType.P2P));
+            swapWorlds = false;
+        }
 
         if (!Inventory.isFull()) {
             Log.Information("Inventory is not full.");
@@ -148,6 +166,9 @@ public final class MashRunecrafting extends Plugin {
         }
 
         if (Widgets.isOpen(382)) {
+            Log.Information("Bypassing wilderness PvP warning.");
+            Actions.menu(Actions.MENU_EXECUTE_DIALOGUE, 0, -1, 25034765, 0);
+            Helper.Wait(1000);
             Actions.menu(Actions.MENU_EXECUTE_DIALOGUE, 0, -1, 25034760, 0);
         }
 
@@ -281,9 +302,6 @@ public final class MashRunecrafting extends Plugin {
 
     @Override
     public void onPaint() {
-        ImGui.label("");
-        ImGui.label("MashRunecrafting");
-        ImGui.label("");
         if (Players.self() != null) {
             if (ImGui.beginTabBar("MainTabs")) {
                 if (ImGui.beginTabItem("Main")) {

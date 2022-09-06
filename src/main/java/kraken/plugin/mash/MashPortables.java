@@ -24,7 +24,9 @@ public class MashPortables extends Plugin {
     private static int comboSelected = 0;
     private static PortableModel portableChosen = PortableModel.GetPortableByName("Portable brazier");
     private static int presetSelected = 1;
-    private static final ManualLocationModel bankLocation = ManualLocationModel.GetLocationByName("Grand Exchange");
+    private static ManualLocationModel bankLocation = ManualLocationModel.GetLocationByName("Grand Exchange");
+    private static String[] areasAvailable = new String[] { "Grand Exchange", "Lumbridge" };
+    private static int areaSelected = 1;
     private static Stopwatch idleTimer = Stopwatch.createStarted();
     public static boolean currentlyCrafting = false;
     public static ArrayList<Integer> presetItems = new ArrayList<>();
@@ -35,7 +37,7 @@ public class MashPortables extends Plugin {
 
     @Override
     public boolean onLoaded(PluginContext pluginContext) {
-        pluginContext.setName("MashPortables v1.05092022a");
+        pluginContext.setName("MashPortables v1.05092022b");
         return true;
     }
 
@@ -61,11 +63,17 @@ public class MashPortables extends Plugin {
             }
         }
 
-        if (Inventory.countFreeSlots() >= 12 || !InventoryHandler.HaveAll(presetItems)) {
+        ArrayList<WorldTile> coords = bankLocation.Path.get(0).Coordinates;
+        int distanceToArea = coords.get(coords.size() - 1).distance(Players.self().getGlobalPosition());
+        if (distanceToArea > 50) {
+            Log.Information("Too far from the bank, moving to it.");
+            ManualMovementHandler.GoTo(bankLocation);
+            return;
+        }
+
+        if (!InventoryHandler.HaveAll(presetItems)) {
             if (!InventoryHandler.HaveAll(presetItems))
                 Log.Information("Not all preset items are in the inventory.");
-            if (Inventory.countFreeSlots() >= 12)
-                Log.Information("Inventory is half empty.");
 
             currentlyCrafting = false;
             if (BankHandler.BankNearby(LocationType.Bank)) {
@@ -89,7 +97,7 @@ public class MashPortables extends Plugin {
             Log.Information("Starting a craft.");
             SceneObject portable = SceneObjects.closest(x -> portableChosen.ObjectIds.contains(x.getId()));
 
-            if (portable != null){
+            if (portable != null) {
                 if (!Widgets.isOpen(1371)) {
                     portable.interact(Actions.MENU_EXECUTE_OBJECT1);
                     Helper.Wait(1000);
@@ -103,9 +111,8 @@ public class MashPortables extends Plugin {
                 return;
             }
 
-            ArrayList<WorldTile> coords = bankLocation.Path.get(0).Coordinates;
-            if (coords.get(coords.size()-1).distance(Players.self().getGlobalPosition()) > 30) {
-                Log.Information("Cant find a portable, going to the Grand Exchange.");
+            if (distanceToArea > 30) {
+                Log.Information("Cant find a portable, going to the bank.");
                 ManualMovementHandler.GoTo(bankLocation);
                 return;
             }
@@ -134,6 +141,9 @@ public class MashPortables extends Plugin {
         if (!startRoutine) {
             comboSelected = ImGui.combo("Portable##PortableSelectCombo", comboOptions, comboSelected);
             portableChosen = PortableModel.GetPortableByName(comboOptions[comboSelected]);
+            areaSelected = ImGui.combo("Area##PortableSelectAreaCombo", areasAvailable, areaSelected);
+            bankLocation = ManualLocationModel.GetLocationByName(areasAvailable[areaSelected]);
+
             ImGui.newLine();
             ImGui.label(MessageFormat.format("Skill: {0}", portableChosen.Skill));
             ImGui.newLine();
@@ -141,7 +151,7 @@ public class MashPortables extends Plugin {
             ImGui.label("Inventory:");
             for (int i = 0; i < InventoryHandler.GetDistinctWidgetItems().length; i++) {
                 WidgetItem item = InventoryHandler.GetDistinctWidgetItems()[i];
-                selectedItems.set(i, ImGui.checkbox(MessageFormat.format("{0} ({1})##SelectItem{2}", item.getName(), item.getId(), item.getId()), selectedItems.get(i)));
+                selectedItems.set(i, ImGui.checkbox(MessageFormat.format("{0}##SelectItem{1}", item.getName(), item.getId()), selectedItems.get(i)));
             }
         } else {
             ImGui.label(MessageFormat.format("Using {0} ({1}).", portableChosen.Name, portableChosen.Skill));

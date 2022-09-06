@@ -36,4 +36,8 @@ public class Helper {
     public static int PercentOf(int percent, int value) {
         return (percent / 100) * value;
     }
+
+    public static String ReplaceString(String string, String value, String with) {
+        return string.replace(value, with);
+    }
 }

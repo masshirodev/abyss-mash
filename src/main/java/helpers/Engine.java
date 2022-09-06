@@ -1,12 +1,14 @@
 package helpers;
 
-import abyss.plugin.api.actions.attributes.PluginAttributes;
+import enums.World;
+import kraken.plugin.api.Client;
 import kraken.plugin.api.Kraken;
 import kraken.plugin.api.PluginContext;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 
-public class System {
+public class Engine {
     public static ArrayList<String> GetInstalledPlugins() {
         ArrayList<String> plugins = new ArrayList<>();
         for (PluginContext ctx : Kraken.getAllPlugins())
@@ -22,5 +24,16 @@ public class System {
                 return true;
 
         return false;
+    }
+
+    public static void SwapWorld(World world) {
+        Integer targetWorld = Integer.valueOf(Helper.ReplaceString(world.name(), "WORLD", ""));
+        if (targetWorld != 0) {
+            Log.Information(MessageFormat.format("Changing worlds to {0}.", targetWorld));
+            Kraken.setRandomizeWorldLoginType(null);
+            Kraken.setLoginWorld(targetWorld);
+            Kraken.toggleAutoLogin(true);
+            Client.exitToLobby();
+        }
     }
 }

@@ -62,6 +62,7 @@ public class PortableModel {
 //                "Protean"
         };
     }
+    
     public static String[] GetPortableListToCombo() {
         return new String[] {
                 "Portable brazier",

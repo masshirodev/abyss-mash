@@ -12,5 +12,6 @@ public enum LocationType {
     Bossing,
     Woodcutting,
     Runecrafting,
-    Slayer
+    Slayer,
+    Divination
 }
