@@ -2190,6 +2190,81 @@ public class ManualLocationModel {
                         new ArrayList<ExitPathModel>()
                 ));
 
+                add(new ManualLocationModel(
+                        48,
+                        "Default",
+                        "Varrock Material cache (Third Age iron)",
+                        new ArrayList<LocationType>() {
+                            {
+                                add(LocationType.Archaeology);
+                                add(LocationType.OpenWorld);
+                            }
+                        },
+                        "Varrock",
+                        100,
+                        new ArrayList<RequirementModel>(),
+                        new WorldTile(0, 0, 0),
+                        new WorldTile(0, 0, 0),
+                        new ArrayList<PathModel>() {
+                            {
+                                add(new PathModel(
+                                        1,
+                                        new ArrayList<WorldTile>() {
+                                            {
+                                                add(new WorldTile(3214, 3376, 0));
+                                                add(new WorldTile(3243, 3375, 0));
+                                                add(new WorldTile(3279, 3373, 0));
+                                                add(new WorldTile(3307, 3386, 0));
+                                                add(new WorldTile(3332, 3395, 0));
+                                                add(new WorldTile(3360, 3396, 0));
+                                                add(new WorldTile(3385, 3395, 0));
+                                            }
+                                        },
+                                        new ArrayList<RequirementModel>()
+                                ));
+                            }
+                        },
+                        new ArrayList<CustomPathModel>(),
+                        new ArrayList<ExitPathModel>()
+                ));
+
+                add(new ManualLocationModel(
+                        49,
+                        "Default",
+                        "Archaeology Guild Bank Chest",
+                        new ArrayList<LocationType>() {
+                            {
+                                add(LocationType.Archaeology);
+                                add(LocationType.Bank);
+                            }
+                        },
+                        "Varrock",
+                        100,
+                        new ArrayList<RequirementModel>(),
+                        new WorldTile(0, 0, 0),
+                        new WorldTile(0, 0, 0),
+                        new ArrayList<PathModel>() {
+                            {
+                                add(new PathModel(
+                                        1,
+                                        new ArrayList<WorldTile>() {
+                                            {
+                                                add(new WorldTile(3214, 3376, 0));
+                                                add(new WorldTile(3239, 3375, 0));
+                                                add(new WorldTile(3267, 3375, 0));
+                                                add(new WorldTile(3294, 3374, 0));
+                                                add(new WorldTile(3325, 3399, 0));
+                                                add(new WorldTile(3356, 3396, 0));
+                                            }
+                                        },
+                                        new ArrayList<RequirementModel>()
+                                ));
+                            }
+                        },
+                        new ArrayList<CustomPathModel>(),
+                        new ArrayList<ExitPathModel>()
+                ));
+
 //                add(new LocationModel(
 //                        000000000000,
 //                        "Default",

@@ -41,6 +41,7 @@ public final class MashCroesus extends Plugin {
     @Override
     public boolean onLoaded(PluginContext pluginContext) {
         pluginContext.setName("MashCroesus");
+//        pluginContext.category = "Mash";
         return true;
     }
 

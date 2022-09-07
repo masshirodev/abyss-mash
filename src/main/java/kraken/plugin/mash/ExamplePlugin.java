@@ -5,19 +5,15 @@ import kraken.plugin.api.Players;
 import kraken.plugin.api.Plugin;
 import kraken.plugin.api.PluginContext;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-
-public class MashMemories extends Plugin {
+public class ExamplePlugin extends Plugin {
     private static boolean startRoutine = false;
-    private static ArrayList<Integer> memoryJar = new ArrayList<Integer>(Arrays.asList(42898, 42899));
 
-    public MashMemories() {
+    public ExamplePlugin() {
     }
 
     @Override
     public boolean onLoaded(PluginContext pluginContext) {
-        pluginContext.setName("MashMemories v1.05092022a");
+        pluginContext.setName("ExamplePlugin v1.05092022a");
 //        pluginContext.category = "Mash";
         return true;
     }

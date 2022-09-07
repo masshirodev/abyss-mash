@@ -6,6 +6,8 @@ import com.google.common.base.Stopwatch;
 import enums.LocationType;
 import helpers.Helper;
 import helpers.Log;
+import helpers.Metrics;
+import helpers.Skills;
 import kraken.plugin.api.*;
 import models.ManualLocationModel;
 import models.PortableModel;
@@ -31,6 +33,10 @@ public class MashPortables extends Plugin {
     public static boolean currentlyCrafting = false;
     public static ArrayList<Integer> presetItems = new ArrayList<>();
     private static ArrayList<Boolean> selectedItems = new ArrayList<>(Arrays.asList(false, false, false, false, false, false, false));
+    private static float startRoutineXp;
+    private static Stopwatch xpTimer = Stopwatch.createStarted();
+    private static boolean fireUrnBeforeBanking = false;
+    private static int fireUrnKeySelected = 0;
 
     public MashPortables() {
     }
@@ -38,6 +44,7 @@ public class MashPortables extends Plugin {
     @Override
     public boolean onLoaded(PluginContext pluginContext) {
         pluginContext.setName("MashPortables v1.05092022b");
+//        pluginContext.category = "Mash";
         return true;
     }
 
@@ -74,6 +81,14 @@ public class MashPortables extends Plugin {
         if (!InventoryHandler.HaveAll(presetItems)) {
             if (!InventoryHandler.HaveAll(presetItems))
                 Log.Information("Not all preset items are in the inventory.");
+
+
+            if (fireUrnBeforeBanking) {
+//                boolean urns = Inventory.contains(x -> x.getName().contains("(unf)"));
+//                if () {
+//
+//                }
+            }
 
             currentlyCrafting = false;
             if (BankHandler.BankNearby(LocationType.Bank)) {
@@ -143,6 +158,7 @@ public class MashPortables extends Plugin {
             portableChosen = PortableModel.GetPortableByName(comboOptions[comboSelected]);
             areaSelected = ImGui.combo("Area##PortableSelectAreaCombo", areasAvailable, areaSelected);
             bankLocation = ManualLocationModel.GetLocationByName(areasAvailable[areaSelected]);
+            startRoutineXp = (float) Skills.GetStats(portableChosen.Skill).getXp();
 
             ImGui.newLine();
             ImGui.label(MessageFormat.format("Skill: {0}", portableChosen.Skill));
@@ -158,11 +174,15 @@ public class MashPortables extends Plugin {
         }
 
         ImGui.newLine();
+        float xpHour = Metrics.CalculateXpPerHour(portableChosen.Skill, startRoutineXp, xpTimer);
+        ImGui.label(MessageFormat.format("{0} Xp/hour: {1}", portableChosen.Skill, xpHour));
+        ImGui.newLine();
 
         String toggleRoutineText = startRoutine ? "Stop Routine" : "Start Routine";
         if (ImGui.button(toggleRoutineText)) {
             if (startRoutine)
                 presetItems = new ArrayList<>();
+
             startRoutine = !startRoutine;
             currentlyCrafting = false;
         }

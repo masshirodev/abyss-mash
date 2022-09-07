@@ -38,6 +38,7 @@ public class MashDebug extends Plugin {
     @Override
     public boolean onLoaded(@NotNull PluginContext pluginContext) {
         pluginContext.setName("MashDebug");
+//        pluginContext.category = "Mash";
         return true;
     }
 
@@ -60,10 +61,6 @@ public class MashDebug extends Plugin {
     
     @Override
     public void onPaint() {
-        ImGui.label("");
-        ImGui.label("MashDebug");
-        ImGui.label("");
-
         if (Players.self() != null) {
             if (ImGui.beginTabBar("MainTabs")) {
                 if (ImGui.beginTabItem("Main")) {

@@ -31,6 +31,7 @@ public final class MashWoodcutting extends Plugin {
     @Override
     public boolean onLoaded(PluginContext pluginContext) {
         pluginContext.setName("MashWoodcutting");
+//        pluginContext.category = "Mash";
         return true;
     }
 

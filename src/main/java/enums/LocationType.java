@@ -13,5 +13,7 @@ public enum LocationType {
     Woodcutting,
     Runecrafting,
     Slayer,
-    Divination
+    Divination,
+    Archaeology,
+    ArchaeologyBank
 }

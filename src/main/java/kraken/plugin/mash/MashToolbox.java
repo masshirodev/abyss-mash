@@ -18,6 +18,7 @@ public final class MashToolbox extends Plugin {
     @Override
     public boolean onLoaded(PluginContext pluginContext) {
         pluginContext.setName("MashToolbox");
+//        pluginContext.category = "Mash";
         return true;
     }
 

@@ -77,6 +77,7 @@ public class BankHandler {
                 add(496);
                 add(76274);
                 add(3418);
+                add(115427);
             }
         };
     }
@@ -183,7 +184,8 @@ public class BankHandler {
         }
     }
 
-    public static void WithdrawFirst(Filter<WidgetItem> predicate, int option) {
+    @Deprecated
+    public static void WithdrawFirstOld(Filter<WidgetItem> predicate, int option) {
         boolean ready = OpenBank();
 
         if (ready) {
@@ -194,6 +196,15 @@ public class BankHandler {
                 Withdraw(item, option);
                 Log.Information(MessageFormat.format("Actions.menu({0}, {1}, {2}, 33882307, 0);", Actions.MENU_EXECUTE_WIDGET, option, item.getSlot(), item.getWidgetId()));
             }
+        }
+    }
+
+    public static void WithdrawFirst(Filter<WidgetItem> predicate, int option) {
+        boolean ready = OpenBank();
+
+        if (ready) {
+            Log.Information("Withdrawing item.");
+            Bank.withdraw(predicate, option);
         }
     }
 

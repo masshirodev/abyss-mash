@@ -13,7 +13,7 @@ public class MiningHandler {
     private static OreModel oreChosen;
     private static SceneObject[] ores;
 
-    public static void Execute(OreModel ore, SceneObject[] oreEntities) {
+    public static void Execute(OreModel ore, SceneObject[] oreEntities, int adrenalineThreshold) {
         oreChosen = ore;
         ores = oreEntities;
         ManualMovementHandler.movementIndex = 0;
@@ -24,11 +24,16 @@ public class MiningHandler {
         Log.Information(MessageFormat.format("Mining {0}s.", oreChosen.Name));
         switch(oreChosen.Name) {
             default:
-                Mine();
+                Mine(adrenalineThreshold);
         }
     }
 
-    private static void Mine() {
+    private static void Mine(int adrenalineThreshold) {
+        Player player = Players.self();
+        if (SkillingHandler.HandleSerenSpirits() || SkillingHandler.HandleDivineBlessings()) {
+            currentRock = null;
+        }
+
         SceneObject closest = SceneObjects.closest(x -> oreChosen.ObjectId.contains(x.getId()));
 
         if (currentRock == null) {
@@ -57,7 +62,7 @@ public class MiningHandler {
             return;
         }
 
-        if (Players.self().getAdrenaline() < 0.3) {
+        if (player.getAdrenaline() < ((float) adrenalineThreshold / 100L)) {
             currentRock.interact("Mine");
         }
     }

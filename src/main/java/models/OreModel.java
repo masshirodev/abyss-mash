@@ -9,7 +9,15 @@ import java.util.Arrays;
 
 public class OreModel {
 
-    public OreModel(int id, ArrayList<Integer> objectId, String name, ArrayList<RequirementModel> requirements, String[] mineList, String closestDeposit, LocationType depositType) {
+    public OreModel(
+            int id,
+            ArrayList<Integer> objectId,
+            String name,
+            ArrayList<RequirementModel> requirements,
+            String[] mineList,
+            String closestDeposit,
+            LocationType depositType
+    ) {
         this.Id = id;
         this.ObjectId = objectId;
         this.Name = name;
@@ -230,7 +238,7 @@ public class OreModel {
                                 ));
                             }
                         },
-                        new String[] { "Ourania Battlefield Mine", "Burthorpe Mine (Center)" },
+                        new String[] { "Ourania Battlefield Mine", "Mining Guild Resource Dungeon" }, // "Burthorpe Mine (Center)"
                         "Al Kharid Metal Bank",
                         LocationType.MetalBank
                 ));

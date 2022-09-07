@@ -14,39 +14,51 @@ public class SkillingHandler {
     private static ArrayList<Integer> divineBlessingIds = new ArrayList<Integer>(Arrays.asList(27228));
     private static ArrayList<Integer> catalystAlterationIds = new ArrayList<Integer>(Arrays.asList(28411));
 
-    public static void HandleChronicles() {
+    public static boolean HandleChronicles() {
         Npc chronicle = Npcs.closest(x -> chronicleIds.contains(x.getId()));
 
         if (chronicle != null) {
+            Helper.Wait(2000);
             chronicle.interact(Actions.MENU_EXECUTE_NPC1);
-            Helper.Wait(1000);
+            return true;
         }
+
+        return false;
     }
 
-    public static void HandleSerenSpirits() {
+    public static boolean HandleSerenSpirits() {
         Npc seren = Npcs.closest(x -> serenSpiritIds.contains(x.getId()));
 
         if (seren != null) {
+            Helper.Wait(2000);
             seren.interact(Actions.MENU_EXECUTE_NPC1);
-            Helper.Wait(1000);
+            return true;
         }
+
+        return false;
     }
 
-    public static void HandleDivineBlessings() {
+    public static boolean HandleDivineBlessings() {
         Npc seren = Npcs.closest(x -> divineBlessingIds.contains(x.getId()));
 
         if (seren != null) {
+            Helper.Wait(2000);
             seren.interact(Actions.MENU_EXECUTE_NPC1);
-            Helper.Wait(1000);
+            return true;
         }
+
+        return false;
     }
 
-    public static void HandleCatalystOfAlteration() {
+    public static boolean HandleCatalystOfAlteration() {
         Npc seren = Npcs.closest(x -> catalystAlterationIds.contains(x.getId()));
 
         if (seren != null) {
+            Helper.Wait(2000);
             seren.interact(Actions.MENU_EXECUTE_NPC1);
-            Helper.Wait(1000);
+            return true;
         }
+
+        return false;
     }
 }

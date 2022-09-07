@@ -9,7 +9,7 @@ import java.util.Objects;
 
 public class Skills {
     public static Stat GetStats(String skill) {
-        switch (skill){
+        switch (skill.toUpperCase()){
             case "ATTACK":
                 return Client.getStatById(Client.ATTACK);
             case "DEFENSE":

@@ -3,16 +3,16 @@ package kraken.plugin.mash;
 import abyss.plugin.api.input.InputHelper;
 import abyss.plugin.api.variables.VariableManager;
 import com.google.common.base.Stopwatch;
+import enums.KeyboardKey;
 import enums.LocationType;
 import enums.World;
 import helpers.Engine;
 import helpers.Helper;
 import helpers.Log;
-import helpers.Skills;
-import kotlin.Triple;
 import kraken.plugin.api.*;
 import models.ManualLocationModel;
 import models.RuneModel;
+import models.RunePouchModel;
 import modules.BankHandler;
 import modules.EquipmentHandler;
 import modules.InventoryHandler;
@@ -22,7 +22,6 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 public final class MashRunecrafting extends Plugin {
@@ -41,27 +40,22 @@ public final class MashRunecrafting extends Plugin {
     private static final ManualLocationModel innerCircleArea = ManualLocationModel.GetLocationByName("Abyss Inner Circle");
     private static final ArrayList<Integer> degradedPouchIds = new ArrayList<Integer>(Arrays.asList(5511, 5513, 5515, 24204));
     private static final ArrayList<Integer> wildSwords = new ArrayList<Integer>(Arrays.asList(37904, 37905, 37906, 37907));
-    private static final ArrayList<Triple<Integer, Integer, Integer>> pouchs = new ArrayList<Triple<Integer, Integer, Integer>>() {
-        {
-            // Item Id - Items inside ConVar - Cap
-            add(new Triple<Integer, Integer, Integer>(5509, 16497, 3));
-            add(new Triple<Integer, Integer, Integer>(5510, 16498, 6));
-            add(new Triple<Integer, Integer, Integer>(5512, 16499, 9));
-            add(new Triple<Integer, Integer, Integer>(5514, 16500, 12));
-            add(new Triple<Integer, Integer, Integer>(24205, 16521, 18));
-        }
-    };
+    private static final ArrayList<RunePouchModel> pouchs = RunePouchModel.GetRunecraftingPouches();
     private static SceneObject innerEntrance;
     private static ArrayList<Integer> innerEntranceBlackList = new ArrayList<>();
     private static Stopwatch innerEntranceTimeout = Stopwatch.createUnstarted();
     private static boolean swapWorlds = false;
+    private static int pureEssenceId = 7936;
+    private static String[] bankWithdrawOptions = new String[] { "Auto", "Preset" };
+    private static int bankWithdrawSelected = 0;
 
     public MashRunecrafting() {
     }
 
     @Override
     public boolean onLoaded(PluginContext pluginContext) {
-        pluginContext.setName("MashRunecrafting v1.05092022b");
+        pluginContext.setName("MashRunecrafting v1.06092022a");
+//        pluginContext.category = "Mash";
         return true;
     }
 
@@ -90,6 +84,7 @@ public final class MashRunecrafting extends Plugin {
 
     public void Routine() {
         Player player = Players.self();
+        Client.setAutoRetaliating(false);
 
         // RIP
         SceneObject deathHourglass = SceneObjects.closest(x -> x.getId() == 96782);
@@ -114,16 +109,26 @@ public final class MashRunecrafting extends Plugin {
                 enableWildSwordUsage = true;
                 swordUsageTimeout = Stopwatch.createUnstarted();
                 swordUsagePosition = null;
+                ManualMovementHandler.movementIndex = 1;
+
+                if (bankWithdrawSelected == 0) {
+                    Filter<WidgetItem> predicate = x -> RuneModel.GetItemIds().contains(x.getId());
+                    if (Inventory.contains(predicate)) {
+                        Bank.deposit(predicate, 7);
+                    }
+
+                    AutoBankWithdraw();
+                    return;
+                }
 
 //                BankHandler.WithdrawFirst(x -> oreBoxIds.contains(x.getId()), 1);
                 BankHandler.WithdrawPreset(presetSelected);
-                ManualMovementHandler.movementIndex = 1;
                 return;
             }
 
             if (useWildSword) {
                 Log.Information("Checking if I can use the wilderness sword.");
-                SceneObject altar = SceneObjects.closest(x -> runeChosen.AltarId.contains(x.getId()));
+                SceneObject altar = SceneObjects.closest(x -> runeChosen.AltarIds.contains(x.getId()));
                 Log.Information(MessageFormat.format("Altar found: {0}", altar != null));
                 Log.Information(MessageFormat.format("Has Sword: {0}", CheckForWildernessSword()));
 
@@ -202,14 +207,25 @@ public final class MashRunecrafting extends Plugin {
                         Log.Information("Degraded pouches found, repairing.");
                         Npc repairNpc = Npcs.closest(x -> x.getId() == repairNpcId);
 
-                        if (repairNpc != null)
-                            repairNpc.interact(Actions.MENU_EXECUTE_NPC2);
+                        if (repairNpc != null) {
+                            if (repairNpc.getGlobalPosition().distance(player.getGlobalPosition()) > 10) {
+                                Move.to(repairNpc.getGlobalPosition());
+                                return;
+                            }
+
+                            if (Dialogue.isOpen()) {
+                                InputHelper.pressKey(KeyboardKey.KEY_SPACE.getValue());
+                                return;
+                            }
+
+                            repairNpc.interact(Actions.MENU_EXECUTE_NPC3);
+                        }
 
                         return;
                     }
 
                     Log.Information(MessageFormat.format("Looking for a {0} rift.", runeChosen.Name));
-                    SceneObject rift = SceneObjects.closest(x -> runeChosen.RiftId.contains(x.getId()));
+                    SceneObject rift = SceneObjects.closest(x -> runeChosen.RiftIds.contains(x.getId()));
 
                     if (rift != null) {
                         Log.Information("Rift found, interacting.");
@@ -261,7 +277,7 @@ public final class MashRunecrafting extends Plugin {
         }
 
         Log.Information("Looking for an altar.");
-        SceneObject altar = SceneObjects.closest(x -> runeChosen.AltarId.contains(x.getId()));
+        SceneObject altar = SceneObjects.closest(x -> runeChosen.AltarIds.contains(x.getId()));
 
         if (altar != null) {
             Log.Information("Altar found, interacting.");
@@ -273,22 +289,36 @@ public final class MashRunecrafting extends Plugin {
         ManualMovementHandler.GoTo(innerCircleArea);
     }
 
+    private void AutoBankWithdraw() {
+        for (RunePouchModel pouch : pouchs) {
+            if (Inventory.contains(x -> pouch.ItemIds.contains(x.getId()))) continue;
+            if (pouch.Enabled) {
+                Log.Information(MessageFormat.format("Withdrawing {0}.", pouch.Name));
+                BankHandler.WithdrawFirst(x -> pouch.ItemIds.contains(x.getId()) && x.getAmount() > 0, 1);
+                return;
+            }
+        }
+
+        // Fill bag with pure essence
+        Log.Information("Filling inventory with pure essence.");
+        BankHandler.WithdrawAll(x -> x.getId() == pureEssenceId, 7);
+    }
+
     private void FillPouches() {
         if (Inventory.isFull()) {
-            for (Triple<Integer, Integer, Integer> pouchInfo : pouchs) {
-                // Item Id - Items inside ConVar - Cap
-                WidgetItem pouch = Inventory.first(x -> x.getId() == pouchInfo.component1());
+            for (RunePouchModel pouch : pouchs) {
+                WidgetItem item = Inventory.first(x -> pouch.ItemIds.contains(x.getId()));
 
-                if (pouch != null) {
+                if (item != null) {
                     int inside = 0;
-                    if (pouchInfo.component1() == 24205)
-                        inside = Inventory.getVarbitValue(pouch.getSlot(), pouchInfo.component2());
+                    if (pouch.ItemIds.contains(24205))
+                        inside = Inventory.getVarbitValue(item.getSlot(), pouch.InsideConVar);
                     else
-                        inside = VariableManager.getVarbitById(pouchInfo.component2());
+                        inside = VariableManager.getVarbitById(pouch.InsideConVar);
 
-                    if (inside < pouchInfo.component3()) {
-                        if (InventoryHandler.GetInventoryWidgetItemQuantity(7936) >= pouchInfo.component3()) {
-                            InventoryHandler.Interact(pouch, 1);
+                    if (inside == 0) {
+                        if (InventoryHandler.GetInventoryWidgetItemQuantity(pureEssenceId) >= pouch.Cap) {
+                            InventoryHandler.Interact(item, 1);
                             Helper.Wait(1000);
                             continue;
                         }
@@ -317,41 +347,6 @@ public final class MashRunecrafting extends Plugin {
             }
         } else {
             ImGui.label("Log into the game first!");
-        }
-    }
-
-    private void PaintDebug() {
-        ImGui.label("");
-
-        ImGui.label(MessageFormat.format("MINING Level {0} - >= 30 -> {1}", Skills.GetLevel("MINING"), Skills.GetLevel("MINING") >= 30));
-        ImGui.label(MessageFormat.format("THIEVING Level {0} - >= 30 -> {1}", Skills.GetLevel("THIEVING"), Skills.GetLevel("THIEVING") >= 30));
-        ImGui.label(MessageFormat.format("AGILITY Level {0} - >= 30 -> {1}", Skills.GetLevel("AGILITY"), Skills.GetLevel("AGILITY") >= 30));
-        ImGui.label(MessageFormat.format("WOODCUTTING Level {0} - >= 30 -> {1}", Skills.GetLevel("WOODCUTTING"), Skills.GetLevel("WOODCUTTING") >= 30));
-        ImGui.label(MessageFormat.format("FIREMAKING Level {0} - >= 30 -> {1}", Skills.GetLevel("FIREMAKING"), Skills.GetLevel("FIREMAKING") >= 30));
-
-        StringBuilder passableValues = new StringBuilder();
-        for (int i = 0; i < BuildPassableObjectList().size(); i++) {
-            passableValues.append(", ").append(BuildPassableObjectList().get(i));
-        }
-        ImGui.label(MessageFormat.format("Passable: {0}", passableValues.toString()));
-
-        ImGui.label("");
-        ImGui.label("Players.self().getEquipment()");
-        ImGui.label("");
-
-
-        Map<EquipmentSlot, Item> equip = Players.self().getEquipment();
-        for (var entry : equip.entrySet()) {
-            ImGui.label(MessageFormat.format("{0} - {1}", entry.getValue().getId(), entry.getValue().getName()));
-        }
-
-        ImGui.label("");
-        ImGui.label("Equipment.getItems()");
-        ImGui.label("");
-
-        WidgetItem[] equipBag = Equipment.getItems();
-        for (WidgetItem entry : equipBag) {
-            ImGui.label(MessageFormat.format("Slot: {0} - Id: {1} - {2}", entry.getSlot(), entry.getId(), entry.getName()));
         }
     }
 
@@ -401,52 +396,19 @@ public final class MashRunecrafting extends Plugin {
 
     private void PaintMain() {
         if (presetSelected == 0 || presetSelected > 9) presetSelected = 1;
+
+        ImGui.columns("##RunecraftingMainColumns", 2, false);
+        ImGui.beginChild("##RunecraftingMainFrame", true);
+
         if (!startRoutine) {
             runeSelected = ImGui.combo("Rune##RuneSelectCombo", RuneModel.GetRuneListToCombo(), runeSelected);
             if (runeChosen == null || !runeChosen.Name.equals(RuneModel.GetRuneListToCombo()[runeSelected]))
                 runeChosen = RuneModel.GetRuneList().get(runeSelected);
-
-            presetSelected = ImGui.intInput("Preset##InputDesiredPreset", presetSelected);
         } else {
             ImGui.label(MessageFormat.format("Currently crafting: {0}", runeChosen.Name));
         }
-        ImGui.label("");
 
-//        if (ImGui.button("Debug")) {
-//            Actions.menu(Actions.MENU_EXECUTE_DIALOGUE, 0, -1, 25034760, 0);
-//        }
-//
-//        if (ImGui.button("Debug2")) {
-//            EquipmentHandler.Interact(EquipmentSlot.WEAPON, 10);
-//        }
-
-//        for (Triple<Integer, Integer, Integer> pouchInfo : pouchs) {
-//            ImGui.label(MessageFormat.format("Inside {0}: {1} ({2})",
-//                    pouchInfo.component1(),
-//                    VariableManager.getVarbitById(pouchInfo.component2()),
-//                    VariableManager.getVarbitById(pouchInfo.component2()) == pouchInfo.component3()
-//            ));
-//        }
-//        ImGui.label(MessageFormat.format("Inside Inner: {0}", innerCircleArea.Area.contains(Players.self())));
-
-        useWildSword = ImGui.checkbox("Use the wilderness sword.", useWildSword);
-//        if (innerEntranceTimeout != null) {
-//            ImGui.label(MessageFormat.format("innerEntranceTimeout: {0}", innerEntranceTimeout.elapsed(TimeUnit.MILLISECONDS)));
-//        }
-
-        ImGui.label("");
-        ImGui.label("Wilderness Sword: For now, you need to have your sword in the action bar, set up as the R key.");
-        ImGui.label("");
-        ImGui.label("[IMPORTANT] Turn off the Anti AFK plugin as it presses keys to maintain you logged in,");
-        ImGui.label("and it can cause the teleportation to go wrong.");
-        ImGui.label("");
-        ImGui.label("This plugin does not grab individual items from your bank, instead, ");
-        ImGui.label("you gotta make a preset and select it above. Any preset 1-9,");
-        ImGui.label("and make sure that the 1-9 buttons appears on screen when you open the bank.");
-        ImGui.label("This will be fixed with time...");
-        ImGui.label("");
-        ImGui.label("Thank you for your support!");
-        ImGui.label("");
+        ImGui.newLine();
 
         String toggleRoutineText = startRoutine ? "Stop Routine" : "Start Routine";
         if (ImGui.button(toggleRoutineText)) {
@@ -456,5 +418,68 @@ public final class MashRunecrafting extends Plugin {
             if (Inventory.isFull())
                 ManualMovementHandler.movementIndex = ManualMovementHandler.GetClosestIndex(innerCircleArea.Path.get(0).Coordinates);
         }
+
+        ImGui.newLine();
+        ImGui.label("[Wilderness Sword]");
+        ImGui.label("For now, you need to have your");
+        ImGui.label("sword in the action bar, set up as");
+        ImGui.label("the R key.");
+        ImGui.newLine();
+        ImGui.label("[IMPORTANT]");
+        ImGui.label("Turn off the Anti AFK plugin");
+        ImGui.label("as it presses keys to maintain you ");
+        ImGui.label("logged in, and it can cause the");
+        ImGui.label("teleportation to go wrong.");
+        ImGui.newLine();
+        ImGui.label("Thank you for your support!");
+        ImGui.newLine();
+
+        ImGui.endChild();
+        ImGui.nextColumn();
+        ImGui.beginChild("##RunecraftingSecondaryFrame", true);
+
+        if (!startRoutine) {
+            ImGui.label("Withdraw Mode");
+            bankWithdrawSelected = ImGui.combo("##WithdrawModeSelectCombo", bankWithdrawOptions, bankWithdrawSelected);
+
+            switch (bankWithdrawOptions[bankWithdrawSelected]) {
+                case "Auto":
+                    ImGui.label("Pouches and pure essences");
+                    ImGui.label("are going to be withdrawn");
+                    ImGui.label("automatically. Remember to");
+                    ImGui.label("empty your inventory before");
+                    ImGui.label("starting.");
+                    ImGui.newLine();
+                    for (RunePouchModel pouch : pouchs) {
+                        pouch.Enabled = ImGui.checkbox(MessageFormat.format("##TogglePouch{0}", pouch.Id), pouch.Enabled);
+                        if (ImGui.isItemHovered()) {
+
+                            ImGui.beginTooltip();
+                            ImGui.label(MessageFormat.format("Toggle {0}.", pouch.Name));
+                            ImGui.endTooltip();
+                        }
+                        ImGui.sameLine();
+                    }
+                    ImGui.label("Toggle pouches.");
+                    ImGui.newLine();
+                    break;
+                case "Preset":
+                    presetSelected = ImGui.intInput("Preset##InputDesiredPreset", presetSelected);
+                    break;
+            }
+        } else {
+            String mode = bankWithdrawOptions[bankWithdrawSelected];
+            ImGui.label(MessageFormat.format("Withdraw Mode: {0}", mode));
+            if (mode.equals("Preset")) {
+                ImGui.label(MessageFormat.format("Preset selected: {0}", presetSelected));
+            }
+        }
+
+        ImGui.newLine();
+
+        useWildSword = ImGui.checkbox("Wilderness sword.", useWildSword);
+
+        ImGui.endChild();
+        ImGui.columns("", 1, false);
     }
 }

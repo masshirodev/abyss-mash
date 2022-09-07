@@ -3,6 +3,7 @@ package kraken.plugin.mash;
 import abyss.plugin.api.input.InputHelper;
 import com.google.common.base.Stopwatch;
 import helpers.Log;
+import helpers.Welp;
 import kraken.plugin.api.*;
 import models.ManualLocationModel;
 import models.WispModel;
@@ -26,7 +27,8 @@ public class MashDivination extends Plugin {
     private static Npc currentWisp;
     private static Stopwatch harvestTimeout = Stopwatch.createUnstarted();
     private static Stopwatch convertTimeout = Stopwatch.createUnstarted();
-    private static ArrayList<Integer> riftIds = new ArrayList<Integer>(Arrays.asList(87306, 93489, 93495));
+    private static ArrayList<Integer> riftIds = new ArrayList<Integer>(Arrays.asList(2342, 66523, 87306, 89975)); // 110307 // 119345
+    private static ArrayList<Integer> minigameRiftIds = new ArrayList<Integer>(Arrays.asList(93489, 93495));
     private static boolean doYouEvenUwU = false;
 
     public MashDivination() {
@@ -35,6 +37,7 @@ public class MashDivination extends Plugin {
     @Override
     public boolean onLoaded(PluginContext pluginContext) {
         pluginContext.setName("MashDivination v1.05092022a");
+//        pluginContext.category = "Mash";
         return true;
     }
 
@@ -66,13 +69,13 @@ public class MashDivination extends Plugin {
             wispChosen = wispAvailable.get(wispSelected);
             wispLocation = ManualLocationModel.GetLocationByName(wispChosen.Location);
         } else {
-            ImGui.label(MessageFormat.format("Hawvesting {0}s.", wispChosen.Name));
+            ImGui.label(MessageFormat.format("Hawvesting {0}s.", Welp.Uwufy(wispChosen.Name)));
         }
 
         ImGui.newLine();
 
-        ImGui.label(MessageFormat.format("Wevew: {0} :0", wispChosen.Level));
-        ImGui.label(MessageFormat.format("Wocation: {0} >///<", wispChosen.Location));
+        ImGui.label(MessageFormat.format("Wevew: {0} :O", wispChosen.Level));
+        ImGui.label(MessageFormat.format("Wocation: {0} >///<", Welp.Uwufy(wispChosen.Location)));
 
         ImGui.newLine();
         doYouEvenUwU = ImGui.checkbox("UwU!!!", doYouEvenUwU);
@@ -85,7 +88,7 @@ public class MashDivination extends Plugin {
 
         ImGui.newLine();
 
-        String toggleRoutineText = startRoutine ? "Stawp Woutine" : "Stawt Woutine";
+        String toggleRoutineText = startRoutine ? "Stawp Woutine >:C" : "Stawt Woutine uwu!";
         if (ImGui.button(toggleRoutineText)) {
             startRoutine = !startRoutine;
         }
@@ -137,16 +140,24 @@ public class MashDivination extends Plugin {
 
             isConverting = Inventory.contains(x -> wispChosen.ItemIds.contains(x.getId()));
             if (isConverting) {
-                Log.Information("Memories found, converting.");
+                Log.Information("Memories found, trying to convert.");
+
+                if (player.getAnimationId() != 0)
+                    convertTimeout.reset().start();
+
+                SceneObject minigameRift = SceneObjects.closest(x -> minigameRiftIds.contains(x.getId()));
+
+                if (minigameRift != null && convertTimeout.elapsed(TimeUnit.SECONDS) > 5) {
+                    Log.Information("Minigame rift found, ugh.");
+                    Vector3i riftPos = minigameRift.getGlobalPosition();
+                    Actions.menu(Actions.MENU_EXECUTE_OBJECT1, minigameRift.getInteractId(), riftPos.getX(), riftPos.getY(), 0);
+                    return;
+                }
+
                 SceneObject rift = SceneObjects.closest(x -> riftIds.contains(x.getId()));
 
                 if (rift != null && convertTimeout.elapsed(TimeUnit.SECONDS) > 5) {
-                    if (rift.getId() == 93489) {
-                        Vector3i riftPos = rift.getGlobalPosition();
-                        Actions.menu(Actions.MENU_EXECUTE_OBJECT1, 93489, riftPos.getX(), riftPos.getY(), 0);
-                        return;
-                    }
-
+                    Log.Information("Normal rift found.");
                     rift.interact(Actions.MENU_EXECUTE_OBJECT1);
                 }
             }

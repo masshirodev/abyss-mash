@@ -44,6 +44,7 @@ public final class MashCombat extends Plugin {
     @Override
     public boolean onLoaded(PluginContext pluginContext) {
         pluginContext.setName("MashCombat v1.05092022a");
+//        pluginContext.category = "Mash";
         return true;
     }
 
