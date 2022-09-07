@@ -3,6 +3,7 @@ package kraken.plugin.mash;
 import abyss.plugin.api.input.InputHelper;
 import abyss.plugin.api.world.WorldTile;
 import com.google.common.base.Stopwatch;
+import enums.KeyboardKey;
 import enums.LocationType;
 import helpers.Helper;
 import helpers.Log;
@@ -28,7 +29,7 @@ public class MashPortables extends Plugin {
     private static int presetSelected = 1;
     private static ManualLocationModel bankLocation = ManualLocationModel.GetLocationByName("Grand Exchange");
     private static String[] areasAvailable = new String[] { "Grand Exchange", "Lumbridge" };
-    private static int areaSelected = 1;
+    private static int areaSelected = 0;
     private static Stopwatch idleTimer = Stopwatch.createStarted();
     public static boolean currentlyCrafting = false;
     public static ArrayList<Integer> presetItems = new ArrayList<>();
@@ -37,13 +38,17 @@ public class MashPortables extends Plugin {
     private static Stopwatch xpTimer = Stopwatch.createStarted();
     private static boolean fireUrnBeforeBanking = false;
     private static int fireUrnKeySelected = 0;
+    private static int craftCircuitBreaker = 0;
+    private static boolean forceWithdraw = false;
+    private static int dialoguePressKey = 0;
+    private static String[] dialogueKeys = new String[] { "1", "2", "3", "4", "5" };
 
     public MashPortables() {
     }
 
     @Override
     public boolean onLoaded(PluginContext pluginContext) {
-        pluginContext.setName("MashPortables v1.05092022b");
+        pluginContext.setName("MashPortables v1.07092022a");
 //        pluginContext.category = "Mash";
         return true;
     }
@@ -60,6 +65,13 @@ public class MashPortables extends Plugin {
 
     private void Routine() {
         Player player = Players.self();
+
+        if (!selectedItems.contains(true)) {
+            startRoutine = false;
+            presetItems = new ArrayList<>();
+            currentlyCrafting = false;
+            return;
+        }
 
         if (presetItems.size() == 0) {
             for (int i = 0; i < InventoryHandler.GetDistinctWidgetItems().length; i++) {
@@ -78,19 +90,29 @@ public class MashPortables extends Plugin {
             return;
         }
 
-        if (!InventoryHandler.HaveAll(presetItems)) {
+        if (!InventoryHandler.HaveAll(presetItems) || forceWithdraw) {
             if (!InventoryHandler.HaveAll(presetItems))
                 Log.Information("Not all preset items are in the inventory.");
 
+            currentlyCrafting = false;
 
             if (fireUrnBeforeBanking) {
-//                boolean urns = Inventory.contains(x -> x.getName().contains("(unf)"));
-//                if () {
-//
-//                }
+                Log.Information("Looking for urns to fire.");
+                if (Inventory.contains(x -> x.getName().contains("(unf)"))) {
+                    if (!Widgets.isOpen(1370)) {
+                        Log.Information("Opening fire urn interface.");
+                        InputHelper.pressKey(KeyboardKey.GetByName(KeyboardKey.GetKeyListToCombo()[fireUrnKeySelected]));
+                        Helper.Wait(2000);
+                        return;
+                    }
+
+                    Log.Information("Firing urns.");
+                    InputHelper.pressKey(KeyboardKey.KEY_SPACE.GetValue());
+                    Helper.Wait(1000);
+                    return;
+                }
             }
 
-            currentlyCrafting = false;
             if (BankHandler.BankNearby(LocationType.Bank)) {
                 Log.Information("A bank was found nearby.");
                 BankHandler.WithdrawPreset(presetSelected);
@@ -109,16 +131,33 @@ public class MashPortables extends Plugin {
         }
 
         if (!currentlyCrafting || idleTimer.elapsed(TimeUnit.SECONDS) > 8) {
-            Log.Information("Starting a craft.");
+            Log.Information("Waiting for craft to start.");
             SceneObject portable = SceneObjects.closest(x -> portableChosen.ObjectIds.contains(x.getId()));
 
             if (portable != null) {
-                if (!Widgets.isOpen(1371)) {
-                    portable.interact(Actions.MENU_EXECUTE_OBJECT1);
+                if (Dialogue.isOpen()) {
+                    Log.Information("Pressing dialogue key.");
+                    InputHelper.pressKey(KeyboardKey.GetByIndex(dialoguePressKey+1));
                     Helper.Wait(1000);
                     return;
                 }
 
+                if (!Widgets.isOpen(1371)) {
+                    Log.Information("Interacting with portable.");
+                    portable.interact(Actions.MENU_EXECUTE_OBJECT1);
+                    Helper.Wait(1000);
+                    craftCircuitBreaker = 0;
+                    return;
+                }
+
+                craftCircuitBreaker++;
+                if (craftCircuitBreaker > 2) {
+                    Log.Information("Circuit breaker reached, forcing a bank withdraw.");
+                    forceWithdraw = true;
+                    return;
+                }
+
+                Log.Information("Starting a craft.");
                 Helper.Wait(500);
                 InputHelper.typeKey(0x20);
                 currentlyCrafting = true;
@@ -176,6 +215,12 @@ public class MashPortables extends Plugin {
         ImGui.newLine();
         float xpHour = Metrics.CalculateXpPerHour(portableChosen.Skill, startRoutineXp, xpTimer);
         ImGui.label(MessageFormat.format("{0} Xp/hour: {1}", portableChosen.Skill, xpHour));
+        if (ImGui.isItemHovered()) {
+            ImGui.beginTooltip();
+            ImGui.label("This might need a moment.");
+            ImGui.endTooltip();
+        }
+
         ImGui.newLine();
 
         String toggleRoutineText = startRoutine ? "Stop Routine" : "Start Routine";
@@ -193,6 +238,22 @@ public class MashPortables extends Plugin {
         ImGui.nextColumn();
         ImGui.beginChild("##PortableSecondaryFrame", true);
         presetSelected = ImGui.intInput("Preset##InputDesiredPreset", presetSelected);
+
+        if (portableChosen.Skill.equalsIgnoreCase("crafting")) {
+            fireUrnBeforeBanking = ImGui.checkbox("##FireUrnsBeforeBankingCheck", fireUrnBeforeBanking);
+            ImGui.sameLine();
+            ImGui.beginChild("##FireUrnsKeybindArea", 200, 19, false);
+            fireUrnKeySelected = ImGui.combo("Fire urns.##FireUrnsKeybindCombo", KeyboardKey.GetKeyListToCombo(), fireUrnKeySelected);
+            ImGui.endChild();
+            ImGui.newLine();
+        }
+
+        ImGui.label("Dialogue Key");
+        ImGui.beginChild("##DialoguePressKeyCombo", 120, 19, false);
+        dialoguePressKey = ImGui.combo("##DialoguePressKeyCombo", dialogueKeys, dialoguePressKey);
+        ImGui.endChild();
+        ImGui.newLine();
+
         ImGui.newLine();
         ImGui.label("1 - Select a portable.");
         ImGui.label("2 - Set up a bank preset.");

@@ -38,6 +38,9 @@ public class EnemyModel {
     public static String[] GetEnemyListToCombo() {
         return new String[] {
                 "Cow",
+                "Rabbit",
+                "Adolescent White Wolves",
+                "Spellwisp",
                 "Turoth"
         };
     }
@@ -60,7 +63,49 @@ public class EnemyModel {
                         }
                 ));
                 add(new EnemyModel(
-                        1,
+                        2,
+                        new ArrayList<Integer>(Arrays.asList(26662)),
+                        "Rabbit",
+                        "Burthorpe Bank",
+                        "Burthorpe",
+                        new ArrayList<RequirementModel>(),
+                        "Burthorpe Bank",
+                        new Pair[] {
+//                                new Pair<String, Integer>("Raw Beef", 2132),
+//                                new Pair<String, Integer>("Bones", 526),
+//                                new Pair<String, Integer>("Cow Hide", 1739)
+                        }
+                ));
+                add(new EnemyModel(
+                        3,
+                        new ArrayList<Integer>(Arrays.asList(96)),
+                        "Adolescent White Wolves",
+                        "Taverley Adolescent White Wolves",
+                        "Taverley",
+                        new ArrayList<RequirementModel>(),
+                        "Burthorpe Bank",
+                        new Pair[] {
+//                                new Pair<String, Integer>("Raw Beef", 2132),
+//                                new Pair<String, Integer>("Bones", 526),
+//                                new Pair<String, Integer>("Cow Hide", 1739)
+                        }
+                ));
+                add(new EnemyModel(
+                        4,
+                        new ArrayList<Integer>(Arrays.asList()),
+                        "Spellwisp",
+                        "Taverley Adolescent White Wolves",
+                        "Taverley",
+                        new ArrayList<RequirementModel>(),
+                        "Burthorpe Bank",
+                        new Pair[] {
+//                                new Pair<String, Integer>("Raw Beef", 2132),
+//                                new Pair<String, Integer>("Bones", 526),
+//                                new Pair<String, Integer>("Cow Hide", 1739)
+                        }
+                ));
+                add(new EnemyModel(
+                        5,
                         new ArrayList<Integer>(Arrays.asList(1626, 1627, 1623)),
                         "Turoth",
                         "Fremennik Slayer Dungeon",

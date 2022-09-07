@@ -2265,6 +2265,70 @@ public class ManualLocationModel {
                         new ArrayList<ExitPathModel>()
                 ));
 
+                add(new ManualLocationModel(
+                        50,
+                        "Default",
+                        "Taverley",
+                        new ArrayList<LocationType>() {
+                            {
+                                add(LocationType.Bank);
+                            }
+                        },
+                        "Taverley",
+                        100,
+                        new ArrayList<RequirementModel>(),
+                        new WorldTile(0, 0, 0),
+                        new WorldTile(0, 0, 0),
+                        new ArrayList<PathModel>() {
+                            {
+                                add(new PathModel(
+                                        1,
+                                        new ArrayList<WorldTile>() {
+                                            {
+                                                add(new WorldTile(2878, 3442, 0));
+                                            }
+                                        },
+                                        new ArrayList<RequirementModel>()
+                                ));
+                            }
+                        },
+                        new ArrayList<CustomPathModel>(),
+                        new ArrayList<ExitPathModel>()
+                ));
+
+                add(new ManualLocationModel(
+                        51,
+                        "Default",
+                        "Taverley Adolescent White Wolves",
+                        new ArrayList<LocationType>() {
+                            {
+                                add(LocationType.Bank);
+                            }
+                        },
+                        "Taverley",
+                        100,
+                        new ArrayList<RequirementModel>(),
+                        new WorldTile(0, 0, 0),
+                        new WorldTile(0, 0, 0),
+                        new ArrayList<PathModel>() {
+                            {
+                                add(new PathModel(
+                                        1,
+                                        new ArrayList<WorldTile>() {
+                                            {
+                                                add(new WorldTile(2878, 3442, 0));
+                                                add(new WorldTile(2880, 3425, 0));
+                                                add(new WorldTile(2866, 3451, 0));
+                                            }
+                                        },
+                                        new ArrayList<RequirementModel>()
+                                ));
+                            }
+                        },
+                        new ArrayList<CustomPathModel>(),
+                        new ArrayList<ExitPathModel>()
+                ));
+
 //                add(new LocationModel(
 //                        000000000000,
 //                        "Default",

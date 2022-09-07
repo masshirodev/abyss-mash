@@ -34,7 +34,6 @@ public class EnemyHandler {
 
         if (drop != null){
             Log.Information("Picking up drops.");
-//            GroundItemHandler.PickItem(drop);
             drop.interact(Actions.MENU_EXECUTE_GROUND_ITEM3);
             return;
         }
@@ -42,6 +41,12 @@ public class EnemyHandler {
         if (currentEnemy == null || !currentEnemy.isStatusBarActive(0)) {
             Log.Information("Setting new enemy as the target.");
             currentEnemy = closest;
+
+            if (currentEnemy.getGlobalPosition().distance(player.getGlobalPosition()) > 20) {
+                Move.to(currentEnemy.getGlobalPosition());
+                return;
+            }
+
             currentEnemy.interact(Actions.MENU_EXECUTE_NPC2);
         }
 

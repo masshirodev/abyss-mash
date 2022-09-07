@@ -25,6 +25,8 @@ import java.util.Collections;
 import java.util.concurrent.TimeUnit;
 
 public final class MashRunecrafting extends Plugin {
+    private static PluginContext context;
+    private static boolean settingsLoaded = false;
     public static boolean startRoutine = false;
     public static boolean useWildSword = false;
     private static RuneModel runeChosen;
@@ -48,20 +50,60 @@ public final class MashRunecrafting extends Plugin {
     private static int pureEssenceId = 7936;
     private static String[] bankWithdrawOptions = new String[] { "Auto", "Preset" };
     private static int bankWithdrawSelected = 0;
-
+    private static final Integer[] bankTheseIds = new Integer[] { 47661 };
     public MashRunecrafting() {
     }
 
     @Override
     public boolean onLoaded(PluginContext pluginContext) {
-        pluginContext.setName("MashRunecrafting v1.06092022a");
+        if (context == null)
+            context = pluginContext;
+
+        pluginContext.setName("MashRunecrafting v1.07092022b");
 //        pluginContext.category = "Mash";
+
+        load(context);
         return true;
+    }
+
+    private void HandlePersistentData() {
+        startRoutine = getBoolean("startRoutine");
+        runeSelected = getInt("runeSelected");
+        runeChosen = RuneModel.GetRuneList().get(runeSelected);
+        bankWithdrawSelected = getInt("bankWithdrawSelected");
+        presetSelected = getInt("presetSelected");
+        useWildSword = getBoolean("useWildSword");
+        String[] lastPouch = getString("lastPouch").split(",");
+
+        if (lastPouch.length > 1) {
+            for (int i = 0; i < pouchs.size(); i++) {
+                if (lastPouch[i].equals("true")) {
+                    pouchs.get(i).Enabled = true;
+                }
+            }
+        }
+
+        settingsLoaded = true;
+    }
+
+    private static String GeneratePouchSettings() {
+        StringBuilder result = new StringBuilder();
+        for (int i = 0; i < pouchs.size(); i++) {
+            if (pouchs.get(i).Enabled) {
+                result.append(",true");
+                continue;
+            }
+
+            result.append(",false");
+        }
+
+        return result.toString();
     }
 
     @Override
     public int onLoop() {
         if (Players.self() == null) return 1000;
+        if (!settingsLoaded) HandlePersistentData();
 
         if (startRoutine)
             Routine();
@@ -112,7 +154,10 @@ public final class MashRunecrafting extends Plugin {
                 ManualMovementHandler.movementIndex = 1;
 
                 if (bankWithdrawSelected == 0) {
-                    Filter<WidgetItem> predicate = x -> RuneModel.GetItemIds().contains(x.getId());
+                    ArrayList<Integer> bankThese = new ArrayList<>(Arrays.asList(bankTheseIds));
+                    bankThese.addAll(RuneModel.GetItemIds());
+
+                    Filter<WidgetItem> predicate = x -> bankThese.contains(x.getId());
                     if (Inventory.contains(predicate)) {
                         Bank.deposit(predicate, 7);
                     }
@@ -214,7 +259,7 @@ public final class MashRunecrafting extends Plugin {
                             }
 
                             if (Dialogue.isOpen()) {
-                                InputHelper.pressKey(KeyboardKey.KEY_SPACE.getValue());
+                                InputHelper.pressKey(KeyboardKey.KEY_SPACE.GetValue());
                                 return;
                             }
 
@@ -402,8 +447,11 @@ public final class MashRunecrafting extends Plugin {
 
         if (!startRoutine) {
             runeSelected = ImGui.combo("Rune##RuneSelectCombo", RuneModel.GetRuneListToCombo(), runeSelected);
-            if (runeChosen == null || !runeChosen.Name.equals(RuneModel.GetRuneListToCombo()[runeSelected]))
+            if (runeChosen == null || !runeChosen.Name.equals(RuneModel.GetRuneListToCombo()[runeSelected])) {
                 runeChosen = RuneModel.GetRuneList().get(runeSelected);
+                setAttribute("runeSelected", runeSelected);
+                save(context);
+            }
         } else {
             ImGui.label(MessageFormat.format("Currently crafting: {0}", runeChosen.Name));
         }
@@ -413,6 +461,9 @@ public final class MashRunecrafting extends Plugin {
         String toggleRoutineText = startRoutine ? "Stop Routine" : "Start Routine";
         if (ImGui.button(toggleRoutineText)) {
             startRoutine = !startRoutine;
+            setAttribute("startRoutine", startRoutine);
+            save(context);
+
             enableWildSwordUsage = true;
 
             if (Inventory.isFull())
@@ -441,6 +492,10 @@ public final class MashRunecrafting extends Plugin {
         if (!startRoutine) {
             ImGui.label("Withdraw Mode");
             bankWithdrawSelected = ImGui.combo("##WithdrawModeSelectCombo", bankWithdrawOptions, bankWithdrawSelected);
+            if (getInt("bankWithdrawSelected") != bankWithdrawSelected) {
+                setAttribute("bankWithdrawSelected", bankWithdrawSelected);
+                save(context);
+            }
 
             switch (bankWithdrawOptions[bankWithdrawSelected]) {
                 case "Auto":
@@ -462,9 +517,20 @@ public final class MashRunecrafting extends Plugin {
                     }
                     ImGui.label("Toggle pouches.");
                     ImGui.newLine();
+
+                    if (getString("lastPouch") != GeneratePouchSettings()) {
+                        setAttribute("lastPouch", GeneratePouchSettings());
+                        save(context);
+                    }
+
                     break;
                 case "Preset":
                     presetSelected = ImGui.intInput("Preset##InputDesiredPreset", presetSelected);
+                    if (getInt("presetSelected") != presetSelected) {
+                        setAttribute("presetSelected", presetSelected);
+                        save(context);
+                    }
+
                     break;
             }
         } else {
@@ -478,6 +544,10 @@ public final class MashRunecrafting extends Plugin {
         ImGui.newLine();
 
         useWildSword = ImGui.checkbox("Wilderness sword.", useWildSword);
+        if (getBoolean("useWildSword") != useWildSword) {
+            setAttribute("useWildSword", useWildSword);
+            save(context);
+        }
 
         ImGui.endChild();
         ImGui.columns("", 1, false);

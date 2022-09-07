@@ -1,6 +1,9 @@
 package enums;
 
 
+import abyss.plugin.api.input.InputHelper;
+
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -50,8 +53,25 @@ public enum KeyboardKey {
         value = newValue;
     }
 
-    public int getValue() { return value; }
+    public int GetValue() { return value; }
     private static final List<KeyboardKey> VALUES =
             Collections.unmodifiableList(Arrays.asList(values()));
     private static final int SIZE = VALUES.size();
+
+    public static String[] GetKeyListToCombo() {
+        ArrayList<String> result = new ArrayList<>();
+        for (var val : VALUES) {
+            result.add(val.name());
+        }
+
+        return result.toArray(new String[0]);
+    }
+
+    public static int GetByName(String key) {
+        return valueOf(key).GetValue();
+    }
+
+    public static int GetByIndex(int key) {
+        return GetByName(KeyboardKey.GetKeyListToCombo()[key]);
+    }
 }

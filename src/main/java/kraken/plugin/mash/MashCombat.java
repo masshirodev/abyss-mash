@@ -1,7 +1,9 @@
 package kraken.plugin.mash;
 
+import abyss.plugin.api.variables.Variables;
 import com.google.common.base.Stopwatch;
 import enums.ConsumableType;
+import enums.KeyboardKey;
 import helpers.Helper;
 import javafx.util.Pair;
 import kraken.plugin.api.*;
@@ -28,23 +30,36 @@ public final class MashCombat extends Plugin {
     public static boolean enableOverloads = false;
     public static boolean enableAggression = false;
     public static boolean enablePrayerRenew = false;
-    private static int usePrayerRenewPercentage = 20;
+    private static int usePrayerRenewValue = 20;
     public static boolean enableFood = false;
     public static int useFoodPercentage = 20;
     public static boolean enablePrayerUsage = false;
-    public static int maxHealth = (int) Players.self().getHealth();
-    private static Stopwatch foodTimeout = Stopwatch.createStarted();
-    private static Stopwatch overloadTimeout = Stopwatch.createStarted();
-    private static Stopwatch prayerTimeout = Stopwatch.createStarted();
-    private static Stopwatch aggressionTimeout = Stopwatch.createStarted();
+    public static int maxHealth = Variables.MAX_HEALTH_AMOUNT.getValue();
+
+    private static int consumableCooldown = 2;
+    private static Stopwatch consumableTimer = Stopwatch.createStarted();
+    private static int foodKeybind = 1;
+    private static int overloadKeybind = 2;
+    private static int prayerKeybind = 3;
+    private static int aggressionKeybind = 4;
+    private static int customDropIdInput = 0;
+    public static ArrayList<Integer> customDropIds = new ArrayList<Integer>();
+
 
     public MashCombat() {
+
     }
 
     @Override
     public boolean onLoaded(PluginContext pluginContext) {
-        pluginContext.setName("MashCombat v1.05092022a");
+        pluginContext.setName("MashCombat v1.07092022a");
 //        pluginContext.category = "Mash";
+
+        String startRoutineCheck = persistentAttributes.getOrDefault("startRoutine", "");
+        if (!startRoutineCheck.equals("")) {
+            startRoutine = startRoutineCheck.equals("true");
+        }
+
         return true;
     }
 
@@ -54,12 +69,12 @@ public final class MashCombat extends Plugin {
 
 
         if (startRoutine)
-            CombatRoutine();
+            Routine();
 
         return 1000;
     }
 
-    public void CombatRoutine() {
+    public void Routine() {
         ExecuteConsumables();
         if (Inventory.isFull()) {
             MovementHandler.GoTo(LocationModel.GetLocationByName(enemyChosen.closestDeposit));
@@ -74,34 +89,43 @@ public final class MashCombat extends Plugin {
     }
 
     private void ExecuteConsumables() {
+        if (consumableTimer.elapsed(TimeUnit.SECONDS) < consumableCooldown) return;
+
         Player player = Players.self();
-        if (enableFood && maxHealth < Helper.PercentOf(useFoodPercentage, (int) maxHealth) && foodTimeout.elapsed(TimeUnit.SECONDS) > 5) {
+        if (enableFood && maxHealth < Helper.PercentOf(useFoodPercentage, (int) maxHealth)) {
             WidgetItem food = ConsumableModel.GetFirstInInventoryOfType(ConsumableType.Health);
             if (food != null) {
-                foodTimeout.reset().start();
                 InventoryHandler.Interact(food, 1);
+                consumableTimer.reset().start();
                 return;
             }
         }
 
-        if (enableOverloads && overloadTimeout.elapsed(TimeUnit.SECONDS) > 5) {
-            WidgetItem overload = ConsumableModel.GetFirstInInventoryOfType(ConsumableType.Overload);
-            if (overload != null)
-                InventoryHandler.Interact(overload, 1);
-        }
-
-        if (enableAggression && aggressionTimeout.elapsed(TimeUnit.SECONDS) > 5) {
-            WidgetItem aggression = ConsumableModel.GetFirstInInventoryOfType(ConsumableType.Aggression);
-            if (aggression != null)
-                InventoryHandler.Interact(aggression, 1);
-        }
-
-        if (enablePrayerRenew && prayerTimeout.elapsed(TimeUnit.SECONDS) > 5) {
-//            if (usePrayerRenewPercentage) {
-                WidgetItem prayer = ConsumableModel.GetFirstInInventoryOfType(ConsumableType.Prayer);
-                if (prayer != null)
-                    InventoryHandler.Interact(prayer, 1);
+//        if (enableOverloads && ) {
+//            WidgetItem overload = ConsumableModel.GetFirstInInventoryOfType(ConsumableType.Overload);
+//            if (overload != null) {
+//                InventoryHandler.Interact(overload, 1);
+//                consumableTimer.reset().start();
+//                return;
 //            }
+//        }
+//
+//        if (enableAggression && ) {
+//            WidgetItem aggression = ConsumableModel.GetFirstInInventoryOfType(ConsumableType.Aggression);
+//            if (aggression != null) {
+//                consumableTimer.reset().start();
+//                InventoryHandler.Interact(aggression, 1);
+//                return;
+//            }
+//        }
+
+        if (enablePrayerRenew && Variables.MAX_HEALTH_AMOUNT.getValue() < usePrayerRenewValue) {
+            WidgetItem prayer = ConsumableModel.GetFirstInInventoryOfType(ConsumableType.Prayer);
+            if (prayer != null) {
+                InventoryHandler.Interact(prayer, 1);
+                consumableTimer.reset().start();
+                return;
+            }
         }
     }
 
@@ -147,7 +171,6 @@ public final class MashCombat extends Plugin {
             ImGui.label(MessageFormat.format("Teleport unlocked: {0} ({1})", enemyChosen.teleport, TeleportHandler.Get(enemyChosen.teleport).isAvailable() ));
         }
 
-
         if (enemyChosen.requirements.size() > 0) {
             ImGui.newLine();
             ImGui.label("Requirements:");
@@ -170,31 +193,50 @@ public final class MashCombat extends Plugin {
         ImGui.nextColumn();
         ImGui.beginChild("##CombatSecondaryFrame", true);
 
-        if (ImGui.button("Set Current HP##CombatSetCurrentHPBtn")) {
-            maxHealth = (int) Players.self().getHealth();
-        }
-        ImGui.sameLine();
-        ImGui.beginChild("##SetMaxHPSizeWorkaround", 250, 19, false);
-        maxHealth = ImGui.intInput("%.##SetMapHPInput", maxHealth);
-        ImGui.endChild();
-
-        enableAggression = ImGui.checkbox("Aggression##CombatEnableAggressionCheckbox", enableAggression);
-        enableOverloads = ImGui.checkbox("Overloads##CombatEnableOverloadsCheckbox", enableOverloads);
-
-        // Prayer
-        enablePrayerUsage = ImGui.checkbox("Prayer##CombatEnablePrayerCheckbox", enablePrayerRenew);
-        enablePrayerRenew = ImGui.checkbox("Renew Prayer when below ##CombatEnablePrayerRenewCheckbox", enablePrayerRenew);
-        ImGui.sameLine();
-        ImGui.beginChild("##PrayerRenewInputExtremeWorkaround", 120, 19, false);
-        usePrayerRenewPercentage = ImGui.intInput("%.##PrayerRenewPercentageValue", usePrayerRenewPercentage);
-        ImGui.endChild();
-
         // Food
-        enableFood = ImGui.checkbox("Use food when HP is below ##CombatEnableFoodCheckbox", enableFood);
+        enableFood = ImGui.checkbox("##CombatEnableFoodCheckbox", enableFood);
+        ImGui.sameLine();
+        ImGui.beginChild("##FoodComboExtremeWorkaround", 150, 19, false);
+        foodKeybind = ImGui.combo("##FoodKeybindCombo", KeyboardKey.GetKeyListToCombo(), foodKeybind);
+        ImGui.endChild();
+        ImGui.sameLine();
+        ImGui.label("Use food when HP is below % ");
         ImGui.sameLine();
         ImGui.beginChild("##FoodInputExtremeWorkaround", 120, 19, false);
-        useFoodPercentage = ImGui.intInput("%.##UseFoodPercentageValue", useFoodPercentage);
+        useFoodPercentage = ImGui.intInput("##UseFoodPercentageValue", useFoodPercentage);
         ImGui.endChild();
+
+        // Overloads
+//        enableOverloads = ImGui.checkbox("##CombatEnableOverloadsCheckbox", enableOverloads);
+//        ImGui.sameLine();
+//        ImGui.beginChild("##OverloadsComboExtremeWorkaround", 150, 19, false);
+//        overloadKeybind = ImGui.combo("##OverloadsKeybindCombo", KeyboardKey.GetKeyListToCombo(), overloadKeybind);
+//        ImGui.endChild();
+//        ImGui.sameLine();
+//        ImGui.label("Overloads");
+
+        // Prayer
+//        enablePrayerUsage = ImGui.checkbox("Prayer##CombatEnablePrayerCheckbox", enablePrayerRenew);
+        enablePrayerRenew = ImGui.checkbox("##CombatEnablePrayerRenewCheckbox", enablePrayerRenew);
+        ImGui.sameLine();
+        ImGui.beginChild("##PrayerRenewComboExtremeWorkaround", 150, 19, false);
+        prayerKeybind = ImGui.combo("##PrayerRenewKeybindCombo", KeyboardKey.GetKeyListToCombo(), prayerKeybind);
+        ImGui.endChild();
+        ImGui.sameLine();
+        ImGui.label("Renew Prayer when below ");
+        ImGui.sameLine();
+        ImGui.beginChild("##PrayerRenewInputExtremeWorkaround", 120, 19, false);
+        usePrayerRenewValue = ImGui.intInput("##PrayerRenewPercentageValue", usePrayerRenewValue);
+        ImGui.endChild();
+
+        // Aggression
+//        enableAggression = ImGui.checkbox("##CombatEnableAggressionCheckbox", enableAggression);
+//        ImGui.sameLine();
+//        ImGui.beginChild("##AggressionComboExtremeWorkaround", 150, 19, false);
+//        aggressionKeybind = ImGui.combo("##AggressionKeybindCombo", KeyboardKey.GetKeyListToCombo(), aggressionKeybind);
+//        ImGui.endChild();
+//        ImGui.sameLine();
+//        ImGui.label("Aggression");
 
         // Drops
         if (enemyChosen.drops.length > 0) {
@@ -205,7 +247,31 @@ public final class MashCombat extends Plugin {
                 dropsEnabled.set(index, ImGui.checkbox(MessageFormat.format("{0}##ToggleDrop{1}", drop.getKey().toString(), drop.getValue()), dropsEnabled.get(index)));
                 index++;
             }
+
+            ImGui.newLine();
         }
+
+        ImGui.label("Custom Ids");
+        ImGui.beginChild("##CustomDropIdOneInputArea", 150, 19, false);
+        customDropIdInput = ImGui.intInput("##CustomDropIdOneInput", customDropIdInput);
+        ImGui.endChild();
+        ImGui.sameLine();
+        if (ImGui.button("Add##AddCustomDropId")) {
+            if (customDropIdInput != 0)
+                customDropIds.add(customDropIdInput);
+        }
+
+        if (customDropIds.size() > 0) {
+            for (int i = 0; i < customDropIds.size(); i++) {
+                int val = customDropIds.get(i);
+                ImGui.label(String.valueOf(val));
+                ImGui.sameLine();
+                if (ImGui.button(MessageFormat.format("Remove##RemoveCustomDropId{0}{1}", i, val))) {
+                    customDropIds.remove(i);
+                }
+            }
+        }
+
 
         ImGui.endChild();
         ImGui.columns("", 1, false);
