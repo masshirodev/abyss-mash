@@ -21,7 +21,7 @@ public class BankHandler {
         }
     }
 
-    public static boolean BankNearby(LocationType option) {
+    public static boolean BankNearby(LocationType option, int maxDistance) {
         switch (option) {
             case Bank:
                 boolean npcFound = Npcs

@@ -1,6 +1,5 @@
 package kraken.plugin.mash;
 
-import abyss.plugin.api.input.InputHelper;
 import com.google.common.base.Stopwatch;
 import helpers.Log;
 import helpers.Welp;
@@ -17,6 +16,8 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 public class MashDivination extends Plugin {
+    private static PluginContext context;
+    private static boolean settingsLoaded = false;
     private static boolean startRoutine = false;
     private static int wispSelected = 0;
     private static List<WispModel> wispAvailable = WispModel.GetWispList();
@@ -36,14 +37,57 @@ public class MashDivination extends Plugin {
 
     @Override
     public boolean onLoaded(PluginContext pluginContext) {
-        pluginContext.setName("MashDivination v1.05092022a");
+        if (context == null)
+            context = pluginContext;
+
+        pluginContext.setName("MashDivination v1.08092022a");
 //        pluginContext.category = "Mash";
+
+        load(context);
         return true;
+    }
+
+    private void HandlePersistentData() {
+        Log.Information("Loading settings from last session.");
+
+        startRoutine = getBoolean("startRoutine");
+        wispSelected = getInt("wispSelected");
+        doYouEvenUwU = getBoolean("doYouEvenUwU");
+        wispChosen = wispAvailable.get(wispSelected);
+        wispLocation = ManualLocationModel.GetLocationByName(wispChosen.Location);
+
+        settingsLoaded = true;
+    }
+
+    private void UpdatePersistentData() {
+        boolean any = false;
+
+        if (getBoolean("startRoutine") != startRoutine) {
+            setAttribute("startRoutine", startRoutine);
+            any = true;
+        }
+
+        if (getInt("wispSelected") != wispSelected) {
+            setAttribute("wispSelected", wispSelected);
+            any = true;
+        }
+
+        if (getBoolean("doYouEvenUwU") != doYouEvenUwU) {
+            setAttribute("doYouEvenUwU", doYouEvenUwU);
+            any = true;
+        }
+
+        if (any) {
+            Log.Information("Saving settings.");
+            save(context);
+        }
     }
 
     @Override
     public int onLoop() {
         if (Players.self() == null) return 1000;
+        if (!settingsLoaded) HandlePersistentData();
+        UpdatePersistentData();
 
         if (startRoutine)
             Routine();
@@ -133,6 +177,7 @@ public class MashDivination extends Plugin {
         Player player = Players.self();
         SkillingHandler.HandleChronicles();
         SkillingHandler.HandleSerenSpirits();
+        SkillingHandler.HandleDivineOMatic();
 
         if (Inventory.isFull() || isConverting) {
             if (!convertTimeout.isRunning())

@@ -1470,7 +1470,7 @@ public class ManualLocationModel {
                                         1,
                                         3,
                                         "ObjectInteract",
-                                        Actions.MENU_EXECUTE_OBJECT2,
+                                        Actions.MENU_EXECUTE_OBJECT3,
                                         new ArrayList<Integer>(Arrays.asList(2230)),
                                         15,
                                         4
@@ -2326,6 +2326,81 @@ public class ManualLocationModel {
                             }
                         },
                         new ArrayList<CustomPathModel>(),
+                        new ArrayList<ExitPathModel>()
+                ));
+
+                add(new ManualLocationModel(
+                        25,
+                        "Default",
+                        "Arch Glacor Front",
+                        new ArrayList<LocationType>() {
+                            {
+                                add(LocationType.Battle);
+                                add(LocationType.Bossing);
+                                add(LocationType.Disconnected);
+                            }
+                        },
+                        "Varrock",
+                        100,
+                        new ArrayList<RequirementModel>(),
+                        new WorldTile(0, 0, 0),
+                        new WorldTile(0, 0, 0),
+                        new ArrayList<PathModel>() {
+                            {
+                                add(new PathModel(
+                                        1,
+                                        new ArrayList<WorldTile>() {
+                                            {
+                                                add(new WorldTile(3214, 3376, 0));
+                                                add(new WorldTile(3242, 3374, 0));
+                                                add(new WorldTile(3287, 3374, 0));
+                                                add(new WorldTile(3297, 3413, 0));
+                                                add(new WorldTile(3329, 3450, 0));
+                                                add(new WorldTile(1755, 1341, 0));
+                                                add(new WorldTile(1768, 1322, 0));
+                                                add(new WorldTile(1759, 1293, 0));
+                                                add(new WorldTile(1759, 1264, 0));
+                                                add(new WorldTile(1759, 1230, 0));
+                                                add(new WorldTile(1759, 1230, 0));
+                                                add(new WorldTile(1759, 1207, 0));
+                                                add(new WorldTile(1760, 1180, 0));
+                                                add(new WorldTile(1760, 1180, 0));
+                                                add(new WorldTile(1758, 1122, 0)); // barrier
+                                                add(new WorldTile(1758, 1119, 0));
+                                                add(new WorldTile(1751, 1105, 0));
+                                            }
+                                        },
+                                        new ArrayList<RequirementModel>()
+                                ));
+                            }
+                        },
+                        new ArrayList<CustomPathModel>() {
+                            {
+                                // Ancient Door
+                                add(new CustomPathModel(
+                                        1,
+                                        4,
+                                        "ObjectInteract",
+                                        Actions.MENU_EXECUTE_OBJECT1,
+                                        new ArrayList<Integer>(Arrays.asList(119483)),
+                                        2,
+                                        5
+
+                                ));
+
+                                // Barrier
+                                add(new CustomPathModel(
+                                        1,
+                                        14,
+                                        "ObjectInteract",
+                                        Actions.MENU_EXECUTE_OBJECT1,
+                                        new ArrayList<Integer>(Arrays.asList(121284)),
+                                        2,
+                                        15
+
+                                ));
+                            }
+                        },
                         new ArrayList<ExitPathModel>()
                 ));
 

@@ -27,8 +27,10 @@ import java.util.concurrent.TimeUnit;
 public final class MashRunecrafting extends Plugin {
     private static PluginContext context;
     private static boolean settingsLoaded = false;
+    private static int loopDelay = 1000;
     public static boolean startRoutine = false;
     public static boolean useWildSword = false;
+    private static int wildSwordKey = 1;
     private static RuneModel runeChosen;
     private static int runeSelected = 0;
     private static int presetSelected = 1;
@@ -59,7 +61,7 @@ public final class MashRunecrafting extends Plugin {
         if (context == null)
             context = pluginContext;
 
-        pluginContext.setName("MashRunecrafting v1.07092022b");
+        pluginContext.setName("MashRunecrafting");
 //        pluginContext.category = "Mash";
 
         load(context);
@@ -67,12 +69,16 @@ public final class MashRunecrafting extends Plugin {
     }
 
     private void HandlePersistentData() {
-        startRoutine = getBoolean("startRoutine");
-        runeSelected = getInt("runeSelected");
+        Log.Information("Loading settings from last session.");
+
+        startRoutine = getBoolean("startRoutine") | startRoutine;
+        runeSelected = getInt("runeSelected") | runeSelected;
         runeChosen = RuneModel.GetRuneList().get(runeSelected);
-        bankWithdrawSelected = getInt("bankWithdrawSelected");
-        presetSelected = getInt("presetSelected");
-        useWildSword = getBoolean("useWildSword");
+        bankWithdrawSelected = getInt("bankWithdrawSelected") | bankWithdrawSelected;
+        presetSelected = getInt("presetSelected") | presetSelected;
+        useWildSword = getBoolean("useWildSword") | useWildSword;
+        loopDelay = getInt("loopDelay") != 0 ? getInt("loopDelay") : loopDelay;
+        wildSwordKey = getInt("wildSwordKey") | wildSwordKey;
         String[] lastPouch = getString("lastPouch").split(",");
 
         if (lastPouch.length > 1) {
@@ -89,6 +95,16 @@ public final class MashRunecrafting extends Plugin {
     private static String GeneratePouchSettings() {
         StringBuilder result = new StringBuilder();
         for (int i = 0; i < pouchs.size(); i++) {
+            if (i == 0) {
+                if (pouchs.get(i).Enabled) {
+                    result.append("true");
+                    continue;
+                }
+
+                result.append("false");
+                continue;
+            }
+
             if (pouchs.get(i).Enabled) {
                 result.append(",true");
                 continue;
@@ -100,19 +116,69 @@ public final class MashRunecrafting extends Plugin {
         return result.toString();
     }
 
+    private void UpdatePersistentData() {
+        boolean any = false;
+
+        if (getBoolean("startRoutine") != startRoutine) {
+            setAttribute("startRoutine", startRoutine);
+            any = true;
+        }
+
+        if (getInt("runeSelected") != runeSelected) {
+            setAttribute("runeSelected", runeSelected);
+            any = true;
+        }
+
+        if (getInt("bankWithdrawSelected") != bankWithdrawSelected) {
+            setAttribute("bankWithdrawSelected", bankWithdrawSelected);
+            any = true;
+        }
+
+        if (getInt("presetSelected") != presetSelected) {
+            setAttribute("presetSelected", presetSelected);
+            any = true;
+        }
+
+        if (getBoolean("useWildSword") != useWildSword) {
+            setAttribute("useWildSword", useWildSword);
+            any = true;
+        }
+
+        if (!getString("lastPouch").equals(GeneratePouchSettings())) {
+            setAttribute("lastPouch", GeneratePouchSettings());
+            any = true;
+        }
+
+        if (getInt("loopDelay") != loopDelay) {
+            setAttribute("loopDelay", loopDelay);
+            any = true;
+        }
+
+        if (getInt("wildSwordKey") != wildSwordKey) {
+            setAttribute("wildSwordKey", wildSwordKey);
+            any = true;
+        }
+
+        if (any) {
+            Log.Information("Saving settings.");
+            save(context);
+        }
+    }
+
     @Override
     public int onLoop() {
-        if (Players.self() == null) return 1000;
+        if (Client.getState() != Client.IN_GAME && !Client.isLoading()) return 1000;
         if (!settingsLoaded) HandlePersistentData();
+        UpdatePersistentData();
 
-        if (startRoutine)
+        if (getBoolean("startRoutine"))
             Routine();
 
-        return 1000;
+        return 200;
     }
 
     public static void UseWildernessSword() {
-        InputHelper.typeKey(0x52);
+        InputHelper.pressKey(KeyboardKey.GetByIndex(wildSwordKey));
         Helper.Wait(5000);
     }
 
@@ -146,11 +212,8 @@ public final class MashRunecrafting extends Plugin {
 
         if (!Inventory.isFull()) {
             Log.Information("Inventory is not full.");
-            if (BankHandler.BankNearby(LocationType.Bank)) {
+            if (BankHandler.BankNearby(LocationType.Bank, 100)) {
                 Log.Information("A bank was found nearby.");
-                enableWildSwordUsage = true;
-                swordUsageTimeout = Stopwatch.createUnstarted();
-                swordUsagePosition = null;
                 ManualMovementHandler.movementIndex = 1;
 
                 if (bankWithdrawSelected == 0) {
@@ -174,11 +237,9 @@ public final class MashRunecrafting extends Plugin {
             if (useWildSword) {
                 Log.Information("Checking if I can use the wilderness sword.");
                 SceneObject altar = SceneObjects.closest(x -> runeChosen.AltarIds.contains(x.getId()));
-                Log.Information(MessageFormat.format("Altar found: {0}", altar != null));
-                Log.Information(MessageFormat.format("Has Sword: {0}", CheckForWildernessSword()));
 
                 if (altar != null && CheckForWildernessSword()) {
-                    if (swordUsageTimeout.elapsed(TimeUnit.SECONDS) > 5 && swordUsagePosition.distance(Players.self().getGlobalPosition()) < 20) {
+                    if (swordUsageTimeout.elapsed(TimeUnit.SECONDS) > 10 && swordUsagePosition.distance(Players.self().getGlobalPosition()) < 20) {
                         Log.Information("[FAILSAFE] Player has not teleported away in 10 seconds, re-enabling the wilderness sword.");
                         enableWildSwordUsage = true;
                         swordUsageTimeout = Stopwatch.createUnstarted();
@@ -198,15 +259,13 @@ public final class MashRunecrafting extends Plugin {
 
                     return;
                 }
-
-                return;
             }
 
             ManualMovementHandler.GoTo(bankLocation);
             return;
         }
 
-        if (BankHandler.BankNearby(LocationType.Bank)) {
+        if (BankHandler.BankNearby(LocationType.Bank, 30)) {
             Log.Information("Trying to fill pouches.");
             FillPouches();
             Helper.Wait(2000);
@@ -235,6 +294,9 @@ public final class MashRunecrafting extends Plugin {
 
         if (abyssCreature != null) {
             Log.Information("Player is inside the abyss.");
+            enableWildSwordUsage = true;
+            swordUsageTimeout = Stopwatch.createUnstarted();
+            swordUsagePosition = null;
 
             if (innerCircleArea.Area.contains(Players.self())) {
                 Log.Information("Player is inside inner circle.");
@@ -383,6 +445,12 @@ public final class MashRunecrafting extends Plugin {
                     PaintMain();
                     ImGui.endTabItem();
                 }
+
+                if (ImGui.beginTabItem("Advanced")) {
+                    PaintAdvanced();
+                    ImGui.endTabItem();
+                }
+
 //                if (ImGui.beginTabItem("Debug")) {
 //                    PaintDebug();
 //                    ImGui.endTabItem();
@@ -392,6 +460,20 @@ public final class MashRunecrafting extends Plugin {
             }
         } else {
             ImGui.label("Log into the game first!");
+        }
+    }
+
+    private void PaintAdvanced() {
+        ImGui.label("Delay between loops");
+        loopDelay = ImGui.intSlider("##DelayBetweenLoopsTimerSlider", loopDelay, 200, 1000);
+        if (ImGui.isItemHovered()) {
+            ImGui.beginTooltip();
+            ImGui.label("Delay between each plugin loop, if your ");
+            ImGui.label("character is reacting too slowly, lower this.");
+            ImGui.label("Setting it to 1000 is recommended otherwise.");
+            ImGui.label("Your game may lag and you can def get banned");
+            ImGui.label("if too low.");
+            ImGui.endTooltip();
         }
     }
 
@@ -449,8 +531,6 @@ public final class MashRunecrafting extends Plugin {
             runeSelected = ImGui.combo("Rune##RuneSelectCombo", RuneModel.GetRuneListToCombo(), runeSelected);
             if (runeChosen == null || !runeChosen.Name.equals(RuneModel.GetRuneListToCombo()[runeSelected])) {
                 runeChosen = RuneModel.GetRuneList().get(runeSelected);
-                setAttribute("runeSelected", runeSelected);
-                save(context);
             }
         } else {
             ImGui.label(MessageFormat.format("Currently crafting: {0}", runeChosen.Name));
@@ -461,8 +541,6 @@ public final class MashRunecrafting extends Plugin {
         String toggleRoutineText = startRoutine ? "Stop Routine" : "Start Routine";
         if (ImGui.button(toggleRoutineText)) {
             startRoutine = !startRoutine;
-            setAttribute("startRoutine", startRoutine);
-            save(context);
 
             enableWildSwordUsage = true;
 
@@ -472,9 +550,8 @@ public final class MashRunecrafting extends Plugin {
 
         ImGui.newLine();
         ImGui.label("[Wilderness Sword]");
-        ImGui.label("For now, you need to have your");
-        ImGui.label("sword in the action bar, set up as");
-        ImGui.label("the R key.");
+        ImGui.label("Select a keybind to the right and");
+        ImGui.label("place the sword on your action bar.");
         ImGui.newLine();
         ImGui.label("[IMPORTANT]");
         ImGui.label("Turn off the Anti AFK plugin");
@@ -484,6 +561,8 @@ public final class MashRunecrafting extends Plugin {
         ImGui.newLine();
         ImGui.label("Thank you for your support!");
         ImGui.newLine();
+        ImGui.label("v1.10092022a");
+        ImGui.newLine();
 
         ImGui.endChild();
         ImGui.nextColumn();
@@ -492,10 +571,6 @@ public final class MashRunecrafting extends Plugin {
         if (!startRoutine) {
             ImGui.label("Withdraw Mode");
             bankWithdrawSelected = ImGui.combo("##WithdrawModeSelectCombo", bankWithdrawOptions, bankWithdrawSelected);
-            if (getInt("bankWithdrawSelected") != bankWithdrawSelected) {
-                setAttribute("bankWithdrawSelected", bankWithdrawSelected);
-                save(context);
-            }
 
             switch (bankWithdrawOptions[bankWithdrawSelected]) {
                 case "Auto":
@@ -517,20 +592,9 @@ public final class MashRunecrafting extends Plugin {
                     }
                     ImGui.label("Toggle pouches.");
                     ImGui.newLine();
-
-                    if (getString("lastPouch") != GeneratePouchSettings()) {
-                        setAttribute("lastPouch", GeneratePouchSettings());
-                        save(context);
-                    }
-
                     break;
                 case "Preset":
                     presetSelected = ImGui.intInput("Preset##InputDesiredPreset", presetSelected);
-                    if (getInt("presetSelected") != presetSelected) {
-                        setAttribute("presetSelected", presetSelected);
-                        save(context);
-                    }
-
                     break;
             }
         } else {
@@ -544,10 +608,9 @@ public final class MashRunecrafting extends Plugin {
         ImGui.newLine();
 
         useWildSword = ImGui.checkbox("Wilderness sword.", useWildSword);
-        if (getBoolean("useWildSword") != useWildSword) {
-            setAttribute("useWildSword", useWildSword);
-            save(context);
-        }
+        ImGui.beginChild("##WildSwordKeyArea", 200, 19, false);
+        wildSwordKey = ImGui.combo("Key##WildSwordKeyCombo", KeyboardKey.GetKeyListToCombo(), wildSwordKey);
+        ImGui.endChild();
 
         ImGui.endChild();
         ImGui.columns("", 1, false);

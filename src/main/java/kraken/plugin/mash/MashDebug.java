@@ -44,7 +44,7 @@ public class MashDebug extends Plugin {
 
     @Override
     public int onLoop() {
-        if (Players.self() == null) return 1000;
+        if (Client.getState() != Client.IN_GAME && !Client.isLoading()) return 1000;
 
         if (debugRoutine) {
             WidgetItem toDrop = Inventory.first(x ->x.getName().contains("ore") && !x.getName().contains("ore box"));
@@ -61,79 +61,74 @@ public class MashDebug extends Plugin {
     
     @Override
     public void onPaint() {
-        if (Players.self() != null) {
-            if (ImGui.beginTabBar("MainTabs")) {
-                if (ImGui.beginTabItem("Main")) {
-                    ImGui.label("");
-                    PaintMain();
-                    ImGui.endTabItem();
-                }
-                if (ImGui.beginTabItem("Object")) {
-                    ImGui.label("");
-                    PaintObject();
-                    ImGui.endTabItem();
-                }
+        if (Client.getState() != Client.IN_GAME) return;
 
-                if (ImGui.beginTabItem("Npc")) {
-                    ImGui.label("");
-                    PaintNpc();
-                    ImGui.endTabItem();
-                }
+        if (ImGui.beginTabBar("MainTabs")) {
+            if (ImGui.beginTabItem("Main##MainTab")) {
+                ImGui.newLine();
+                PaintMain();
+                ImGui.endTabItem();
+            }
+            if (ImGui.beginTabItem("Object##ObjectsTab")) {
+                ImGui.newLine();
+                PaintObject();
+                ImGui.endTabItem();
+            }
 
-                if (ImGui.beginTabItem("Player")) {
-                    ImGui.label("");
-                    if (Players.self() != null)
-                        PaintPlayer();
-                    ImGui.endTabItem();
-                }
+            if (ImGui.beginTabItem("Npc##NpcsTab")) {
+                ImGui.newLine();
+                PaintNpc();
+                ImGui.endTabItem();
+            }
 
-                if (ImGui.beginTabItem("StatusBar")) {
-                    ImGui.label("");
-                    PaintStatusBar();
-                    ImGui.endTabBar();
-                }
+            if (ImGui.beginTabItem("Player##PlayerTab")) {
+                ImGui.newLine();
+                PaintPlayer();
+                ImGui.endTabItem();
+            }
 
-                if (ImGui.beginTabItem("Equipment")) {
-                    ImGui.label("");
-                    PaintEquipment();
-                    ImGui.endTabBar();
-                }
-
-                if (ImGui.beginTabItem("Area")) {
-                    ImGui.label("");
-                    PaintArea();
-                    ImGui.endTabItem();
-                }
-
-                if (ImGui.beginTabItem("Path")) {
-                    ImGui.label("");
-                    PaintPath();
-                    ImGui.endTabItem();
-                }
-
-                if (ImGui.beginTabItem("Widget")) {
-                    ImGui.label("");
-                    PaintWidget();
-                    ImGui.endTabItem();
-                }
-
-                if (ImGui.beginTabItem("WidgetItem")) {
-                    ImGui.label("");
-                    PaintWidgetItem();
-                    ImGui.endTabItem();
-                }
-
+            if (ImGui.beginTabItem("StatusBar##StatusBarTab")) {
+                ImGui.newLine();
+                PaintStatusBar();
                 ImGui.endTabBar();
             }
+
+            if (ImGui.beginTabItem("Equipment##EquipmentTab")) {
+                ImGui.newLine();
+                PaintEquipment();
+                ImGui.endTabBar();
+            }
+
+            if (ImGui.beginTabItem("Area##AreaTab")) {
+                ImGui.newLine();
+                PaintArea();
+                ImGui.endTabItem();
+            }
+
+            if (ImGui.beginTabItem("Path##PathTab")) {
+                ImGui.newLine();
+                PaintPath();
+                ImGui.endTabItem();
+            }
+
+            if (ImGui.beginTabItem("Widget##WidgetTab")) {
+                ImGui.newLine();
+                PaintWidget();
+                ImGui.endTabItem();
+            }
+
+            if (ImGui.beginTabItem("WidgetItem##WidgetItemTab")) {
+                ImGui.newLine();
+                PaintWidgetItem();
+                ImGui.endTabItem();
+            }
+
+            ImGui.endTabBar();
         }
     }
 
     private void PaintStatusBar() {
-        Player player = Players.self();
 
-        ImGui.beginChild("##StatusBarFrame", true);
-
-        ImGui.endChild();
     }
 
     private void PaintEquipment() {
@@ -149,7 +144,7 @@ public class MashDebug extends Plugin {
         ImGui.nextColumn();
 
         ImGui.separator();
-        ImGui.label("");
+        ImGui.newLine();
 
         Map<EquipmentSlot, Item> equip = Players.self().getEquipment();
         for (var entry : equip.entrySet()) {
@@ -158,7 +153,7 @@ public class MashDebug extends Plugin {
 
         ImGui.nextColumn();
 
-        ImGui.label("");
+        ImGui.newLine();
 
         WidgetItem[] equipBag = Equipment.getItems();
         for (WidgetItem entry : equipBag) {
@@ -166,7 +161,7 @@ public class MashDebug extends Plugin {
         }
         ImGui.nextColumn();
 
-        ImGui.label("");
+        ImGui.newLine();
 
         Item[] itemCont = ItemContainers.byId(94).getItems();
         for (Item entry : itemCont) {
@@ -206,7 +201,7 @@ public class MashDebug extends Plugin {
             ImGui.label(MessageFormat.format("getClass: {0}", widgetItem.getClass()));
             String[] options = widgetItem.getOptionNames();
             if (options.length > 0) {
-                ImGui.label("");
+                ImGui.newLine();
                 ImGui.label("Interact:");
                 for (int i = 0; i < options.length; i++) {
                     if (ImGui.button(MessageFormat.format("{0} - [{1}]", i+1, options[i]))) {
@@ -289,7 +284,7 @@ public class MashDebug extends Plugin {
         ImGui.sameLine();
         drawingAreaEnabled = ImGui.checkbox("Draw", drawingAreaEnabled);
 
-        ImGui.label("");
+        ImGui.newLine();
         ImGui.label("Global Coordinates -> Scene Coordinates");
         for (int i = 0; i < globalCoordinates.size(); i++) {
             ImGui.label(MessageFormat.format("[{0}] -> [{1}]", globalCoordinates.get(i), sceneCoordinates.get(i)));
@@ -340,7 +335,7 @@ public class MashDebug extends Plugin {
             }
         }
 
-        ImGui.label("");
+        ImGui.newLine();
         ImGui.label(MessageFormat.format("Top Left: {0}", areaTopLeft));
         ImGui.label(MessageFormat.format("Bottom Right: {0}", areaBottomRight));
 

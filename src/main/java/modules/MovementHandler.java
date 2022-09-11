@@ -1,6 +1,7 @@
 package modules;
 
 import abyss.plugin.api.teleport.Lodestones;
+import abyss.plugin.api.world.WorldTile;
 import enums.LocationType;
 import helpers.Log;
 import kraken.plugin.api.Move;
@@ -59,5 +60,9 @@ public class MovementHandler {
         }
 
         return null;
+    }
+
+    public static void MoveAwayFrom(WorldTile position) {
+
     }
 }

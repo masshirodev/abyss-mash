@@ -22,6 +22,8 @@ import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
 public class MashPortables extends Plugin {
+    private static PluginContext context;
+    private static boolean settingsLoaded = false;
     public static boolean startRoutine = false;
     private static String[] comboOptions = PortableModel.GetPortableListToCombo();
     private static int comboSelected = 0;
@@ -32,7 +34,7 @@ public class MashPortables extends Plugin {
     private static int areaSelected = 0;
     private static Stopwatch idleTimer = Stopwatch.createStarted();
     public static boolean currentlyCrafting = false;
-    public static ArrayList<Integer> presetItems = new ArrayList<>();
+    private static ArrayList<Integer> presetItems = new ArrayList<>();
     private static ArrayList<Boolean> selectedItems = new ArrayList<>(Arrays.asList(false, false, false, false, false, false, false));
     private static float startRoutineXp;
     private static Stopwatch xpTimer = Stopwatch.createStarted();
@@ -48,14 +50,104 @@ public class MashPortables extends Plugin {
 
     @Override
     public boolean onLoaded(PluginContext pluginContext) {
-        pluginContext.setName("MashPortables v1.07092022a");
+        if (context == null)
+            context = pluginContext;
+
+        pluginContext.setName("MashPortables v1.08092022a");
 //        pluginContext.category = "Mash";
+
+        load(context);
         return true;
+    }
+
+    private void HandlePersistentData() {
+        Log.Information("Loading settings from last session.");
+
+        startRoutine = getBoolean("startRoutine");
+        comboSelected = getInt("comboSelected");
+        portableChosen = PortableModel.GetPortableByName(comboOptions[comboSelected]);
+        presetSelected = getInt("presetSelected");
+        areaSelected = getInt("areaSelected");
+        fireUrnBeforeBanking = getBoolean("fireUrnBeforeBanking");
+        fireUrnKeySelected = getInt("fireUrnKeySelected");
+        dialoguePressKey = getInt("dialoguePressKey");
+        String[] pItems = getString("presetItems").split(",");
+
+        if (pItems.length > 1) {
+            for (int i = 0; i < pItems.length; i++) {
+                presetItems.add(Integer.valueOf(pItems[i]));
+            }
+        }
+
+        settingsLoaded = true;
+    }
+
+    private void UpdatePersistentData() {
+        boolean any = false;
+
+        if (getBoolean("startRoutine") != startRoutine) {
+            setAttribute("startRoutine", startRoutine);
+            any = true;
+        }
+
+        if (getInt("comboSelected") != comboSelected) {
+            setAttribute("comboSelected", comboSelected);
+            any = true;
+        }
+
+        if (getInt("areaSelected") != areaSelected) {
+            setAttribute("areaSelected", areaSelected);
+            any = true;
+        }
+
+        if (getInt("presetSelected") != presetSelected) {
+            setAttribute("presetSelected", presetSelected);
+            any = true;
+        }
+
+        if (getInt("fireUrnKeySelected") != fireUrnKeySelected) {
+            setAttribute("fireUrnKeySelected", fireUrnKeySelected);
+            any = true;
+        }
+
+        if (getBoolean("fireUrnBeforeBanking") != fireUrnBeforeBanking) {
+            setAttribute("fireUrnBeforeBanking", fireUrnBeforeBanking);
+            any = true;
+        }
+
+        if (getInt("dialoguePressKey") != dialoguePressKey) {
+            setAttribute("dialoguePressKey", dialoguePressKey);
+            any = true;
+        }
+
+        if (!getString("presetItems").equals(GenerateInventorySettings()) && startRoutine) {
+            setAttribute("presetItems", GenerateInventorySettings());
+            any = true;
+        }
+
+        if (any) {
+            Log.Information("Saving settings.");
+            save(context);
+        }
+    }
+
+    private static String GenerateInventorySettings() {
+        StringBuilder result = new StringBuilder();
+        for (int i = 0; i < presetItems.size(); i++) {
+            if (result.length() > 0)
+                result.append(MessageFormat.format(",{0}", presetItems.get(i)));
+            else
+                result.append(presetItems.get(i));
+        }
+
+        return result.toString();
     }
 
     @Override
     public int onLoop() {
         if (Players.self() == null) return 1000;
+        if (!settingsLoaded) HandlePersistentData();
+        UpdatePersistentData();
 
         if (startRoutine)
             Routine();
@@ -65,8 +157,10 @@ public class MashPortables extends Plugin {
 
     private void Routine() {
         Player player = Players.self();
-
         if (!selectedItems.contains(true)) {
+            setAttribute("startRoutine", false);
+            setAttribute("presetItems", "");
+            save(context);
             startRoutine = false;
             presetItems = new ArrayList<>();
             currentlyCrafting = false;
@@ -113,7 +207,7 @@ public class MashPortables extends Plugin {
                 }
             }
 
-            if (BankHandler.BankNearby(LocationType.Bank)) {
+            if (BankHandler.BankNearby(LocationType.Bank, 30)) {
                 Log.Information("A bank was found nearby.");
                 BankHandler.WithdrawPreset(presetSelected);
                 ManualMovementHandler.movementIndex = 1;

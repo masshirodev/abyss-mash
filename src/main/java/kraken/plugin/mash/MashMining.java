@@ -14,6 +14,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 public final class MashMining extends Plugin {
+    private static PluginContext context;
+    private static boolean settingsLoaded = false;
+    private static int loopDelay = 1000;
     private static boolean oreBoxIsFull;
     private static WidgetItem oreBox;
     private static ArrayList<Integer> oreBoxIds = new ArrayList<>(Arrays.asList(
@@ -40,20 +43,102 @@ public final class MashMining extends Plugin {
 
     @Override
     public boolean onLoaded(PluginContext pluginContext) {
-        pluginContext.setName("MashMining v2.06092022a");
+        if (context == null)
+            context = pluginContext;
+
+        pluginContext.setName("MashMining v2.08092022c");
 //        pluginContext.category = "Mash";
+
+        load(context);
         return true;
+    }
+
+    private void HandlePersistentData() {
+        Log.Information("Loading settings from last session.");
+
+        startRoutine = getBoolean("startRoutine");
+        withdrawOreBox = getBoolean("withdrawOreBox");
+        oreSelected = getInt("oreSelected");
+        mineSelected = getInt("mineSelected");
+        depositSelected = getInt("depositSelected");
+        powerMining = getBoolean("powerMining");
+        adrenalineThreshold = getInt("adrenalineThreshold");
+        loopDelay = getInt("loopDelay");
+        oreChosen = OreModel.GetOreList().get(oreSelected);
+
+        if (mineSelected <= oreChosen.MineList.length-1)
+            mineChosen = ManualLocationModel.GetLocationByName(oreChosen.MineList[mineSelected]);
+        else
+            mineChosen = ManualLocationModel.GetLocationByName(oreChosen.MineList[0]);
+
+        ArrayList<ManualLocationModel> bankList = ManualLocationModel.GetLocationListByType(oreChosen.DepositType);
+        if (depositSelected <= bankList.size()-1)
+            depositChosen = ManualLocationModel.GetLocationListByType(oreChosen.DepositType).get(depositSelected);
+        else
+            depositChosen = ManualLocationModel.GetLocationListByType(oreChosen.DepositType).get(0);
+
+        settingsLoaded = true;
+    }
+
+    private void UpdatePersistentData() {
+        boolean any = false;
+
+        if (getBoolean("startRoutine") != startRoutine) {
+            setAttribute("startRoutine", startRoutine);
+            any = true;
+        }
+
+        if (getBoolean("withdrawOreBox") != withdrawOreBox) {
+            setAttribute("withdrawOreBox", withdrawOreBox);
+            any = true;
+        }
+
+        if (getInt("oreSelected") != oreSelected) {
+            setAttribute("oreSelected", oreSelected);
+            any = true;
+        }
+
+        if (getInt("mineSelected") != mineSelected) {
+            setAttribute("mineSelected", mineSelected);
+            any = true;
+        }
+
+        if (getInt("depositSelected") != depositSelected) {
+            setAttribute("depositSelected", depositSelected);
+            any = true;
+        }
+
+        if (getBoolean("powerMining") != powerMining) {
+            setAttribute("powerMining", powerMining);
+            any = true;
+        }
+
+        if (getInt("adrenalineThreshold") != adrenalineThreshold) {
+            setAttribute("adrenalineThreshold", adrenalineThreshold);
+            any = true;
+        }
+
+        if (getInt("loopDelay") != loopDelay) {
+            setAttribute("loopDelay", loopDelay);
+            any = true;
+        }
+
+        if (any) {
+            Log.Information("Saving settings.");
+            save(context);
+        }
     }
 
     @Override
     public int onLoop() {
-        if (Players.self() == null) return 1000;
+        if (Client.getState() != Client.IN_GAME && !Client.isLoading()) return 1000;
+        if (!settingsLoaded) HandlePersistentData();
+        UpdatePersistentData();
 
-
-        if (startRoutine)
+        if (getBoolean("startRoutine"))
             Routine();
 
-        return 1000;
+        return loopDelay;
     }
 
     public void Routine() {
@@ -89,7 +174,7 @@ public final class MashMining extends Plugin {
             }
 
             if (oreBoxIsFull || oreBox == null) {
-                if (BankHandler.BankNearby(oreChosen.DepositType)) {
+                if (BankHandler.BankNearby(oreChosen.DepositType, 30)) {
                     BankHandler.DecideDeposit(oreChosen.DepositType, (x -> !oreBoxIds.contains(x.getId())));
                     return;
                 }
@@ -112,7 +197,7 @@ public final class MashMining extends Plugin {
     }
 
     private void WithdrawOreBox() {
-        if (BankHandler.BankNearby(LocationType.Bank)) {
+        if (BankHandler.BankNearby(LocationType.Bank, 30)) {
             BankHandler.WithdrawFirstOld(x -> oreBoxIds.contains(x.getId()), 1);
             return;
         }
@@ -136,6 +221,11 @@ public final class MashMining extends Plugin {
                     ImGui.endTabItem();
                 }
 
+                if (ImGui.beginTabItem("Advanced")) {
+                    PaintAdvanced();
+                    ImGui.endTabItem();
+                }
+
 //                if (ImGui.beginTabItem("Debug")) {
 //                    PaintDebug();
 //                    ImGui.endTabItem();
@@ -145,6 +235,19 @@ public final class MashMining extends Plugin {
             }
         } else {
             ImGui.label("Log into the game first!");
+        }
+    }
+
+    private void PaintAdvanced() {
+        ImGui.label("Delay between loops");
+        loopDelay = ImGui.intSlider("##DelayBetweenLoopsTimerSlider", loopDelay, 200, 1000);
+        if (ImGui.isItemHovered()) {
+            ImGui.beginTooltip();
+            ImGui.label("Delay between each plugin loop, if your ");
+            ImGui.label("character is reacting too slowly, lower this.");
+            ImGui.label("Setting it to 1000 is recommended otherwise.");
+            ImGui.label("Your game may lag if this is set too low.");
+            ImGui.endTooltip();
         }
     }
 
@@ -161,6 +264,7 @@ public final class MashMining extends Plugin {
             if (oreSelected != oldOreSelected) {
                 depositSelected = Helper.GetIndexOf(bankOptions, oreChosen.ClosestDeposit);
                 oldOreSelected = oreSelected;
+                mineSelected = 0;
             }
 
             mineSelected = ImGui.combo("Mine##MineSelectCombo", oreChosen.MineList, mineSelected);

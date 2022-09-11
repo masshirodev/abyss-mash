@@ -13,6 +13,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Random;
 
 public class ManualMovementHandler {
     public static int movementIndex = 0;
@@ -30,6 +31,15 @@ public class ManualMovementHandler {
         }
     }
 
+    private static void MoveTo(WorldTile coord) {
+        Random rand = new Random();
+        int x = rand.nextInt(coord.getX()-1, coord.getX()+1);
+        int y = rand.nextInt(coord.getY()-1, coord.getY()+1);
+
+        WorldTile newCoord = new WorldTile(x, y, 0);
+        Move.to(newCoord);
+    }
+
     private static void Traverse(ManualLocationModel location) {
         PathModel pathInfo = ManualMovementHandler.DecideBestPath(location.Path);
         ArrayList<WorldTile> path = pathInfo.Coordinates;
@@ -40,7 +50,7 @@ public class ManualMovementHandler {
         Log.Information(MessageFormat.format("Currently moving to index {0}.", coord));
         if (coord.distance(player.getGlobalPosition()) > 5) {
             if (!player.isMoving())
-                Move.to(coord);
+                MoveTo(coord);
         }
     }
 
@@ -49,7 +59,6 @@ public class ManualMovementHandler {
         ArrayList<WorldTile> path = pathInfo.Coordinates;
         WorldTile coord = path.get(movementIndex);
         Lodestones teleport = TeleportHandler.Get(location.Teleport);
-        boolean isFar = coord.distance(Players.self().getGlobalPosition()) > location.TeleportDistance;
         Player player = Players.self();
         ManualLocationModel currentInside = GetCurrentAreaIfType(LocationType.Disconnected);
 
@@ -70,6 +79,7 @@ public class ManualMovementHandler {
             }
 
             // Get the closest coordinate if index == 0
+            boolean isFar = path.get(GetClosestIndex(path)).distance(Players.self().getGlobalPosition()) > location.TeleportDistance;
             if (isFar) {
                 Log.Information(MessageFormat.format("Teleporting to {0}.", teleport.name()));
                 if (teleport.isAvailable())
@@ -99,14 +109,17 @@ public class ManualMovementHandler {
         // Move
         Log.Information(MessageFormat.format("Currently moving to index {0}.", movementIndex));
         if (coord.distance(player.getGlobalPosition()) > 5) {
-            if (!player.isMoving())
-                Move.to(coord);
+            if (!player.isMoving()) {
+
+                MoveTo(coord);
+            }
+
             return;
         }
 
         movementIndex = GetClosestNextIndex(path);
         coord = path.get(movementIndex);
-        Move.to(coord);
+        MoveTo(coord);
         Log.Information(MessageFormat.format("Changing movement index to {0}.", movementIndex));
 
         // Return 0 on path end

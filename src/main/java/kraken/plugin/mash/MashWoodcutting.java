@@ -60,7 +60,7 @@ public final class MashWoodcutting extends Plugin {
                 return;
             }
 
-            if (BankHandler.BankNearby(logChosen.DepositType)) {
+            if (BankHandler.BankNearby(logChosen.DepositType, 30)) {
 //                BankHandler.Decide(logChosen.DepositType, (x -> true));
                 return;
             }
