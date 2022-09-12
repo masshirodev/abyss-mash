@@ -235,21 +235,21 @@ public final class MashRunecrafting extends Plugin {
             }
 
             if (useWildSword) {
-                Log.Information("Checking if I can use the wilderness sword.");
+                Log.Information("Wilderness sword enabled.");
                 SceneObject altar = SceneObjects.closest(x -> runeChosen.AltarIds.contains(x.getId()));
 
                 if (altar != null && CheckForWildernessSword()) {
+                    Log.Information("Trying to use the wilderness sword.");
+
                     if (swordUsageTimeout.elapsed(TimeUnit.SECONDS) > 10 && swordUsagePosition.distance(Players.self().getGlobalPosition()) < 20) {
                         Log.Information("[FAILSAFE] Player has not teleported away in 10 seconds, re-enabling the wilderness sword.");
                         enableWildSwordUsage = true;
-                        swordUsageTimeout = Stopwatch.createUnstarted();
                         swordUsagePosition = null;
                     }
 
                     if (enableWildSwordUsage && !Players.self().isAnimationPlaying()) {
                         Log.Information("Requirements met, using the wilderness sword.");
-                        if (!swordUsageTimeout.isRunning())
-                            swordUsageTimeout.start();
+                        swordUsageTimeout.reset().start();
 
                         swordUsagePosition = Players.self().getGlobalPosition();
                         enableWildSwordUsage = false;
@@ -561,7 +561,7 @@ public final class MashRunecrafting extends Plugin {
         ImGui.newLine();
         ImGui.label("Thank you for your support!");
         ImGui.newLine();
-        ImGui.label("v1.10092022a");
+        ImGui.label("v1.{{replace_version_here}}");
         ImGui.newLine();
 
         ImGui.endChild();
@@ -607,7 +607,7 @@ public final class MashRunecrafting extends Plugin {
 
         ImGui.newLine();
 
-        useWildSword = ImGui.checkbox("Wilderness sword.", useWildSword);
+        useWildSword = ImGui.checkbox("Wilderness sword.", false); // @TODO! Currently disabled.
         ImGui.beginChild("##WildSwordKeyArea", 200, 19, false);
         wildSwordKey = ImGui.combo("Key##WildSwordKeyCombo", KeyboardKey.GetKeyListToCombo(), wildSwordKey);
         ImGui.endChild();
@@ -616,3 +616,6 @@ public final class MashRunecrafting extends Plugin {
         ImGui.columns("", 1, false);
     }
 }
+
+
+

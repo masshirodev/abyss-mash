@@ -1,13 +1,13 @@
 package kraken.plugin.mash;
 
+import abyss.plugin.api.input.InputHelper;
 import abyss.plugin.api.variables.Variables;
 import com.google.common.base.Stopwatch;
-import enums.ConsumableType;
 import enums.KeyboardKey;
 import helpers.Helper;
+import helpers.Log;
 import javafx.util.Pair;
 import kraken.plugin.api.*;
-import models.ConsumableModel;
 import models.EnemyModel;
 import models.LocationModel;
 import models.RequirementModel;
@@ -20,7 +20,10 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 public final class MashCombat extends Plugin {
-    public static boolean startRoutine = false;
+    private static PluginContext context;
+    private static boolean settingsLoaded = false;
+    private static boolean startRoutine = false;
+    private static int loopDelay = 1000;
     private static EnemyModel enemyChosen;
     private static List<EnemyModel> enemiesAvailable = EnemyModel.GetEnemyList();
     private static String[] comboOptions = EnemyModel.GetEnemyListToCombo();
@@ -45,37 +48,57 @@ public final class MashCombat extends Plugin {
     private static int customDropIdInput = 0;
     public static ArrayList<Integer> customDropIds = new ArrayList<Integer>();
 
-
-    public MashCombat() {
-
-    }
+    public MashCombat() { }
 
     @Override
     public boolean onLoaded(PluginContext pluginContext) {
-        pluginContext.setName("MashCombat v1.07092022a");
+        if (context == null)
+            context = pluginContext;
+
+        pluginContext.setName("MashCombat");
 //        pluginContext.category = "Mash";
 
-        String startRoutineCheck = persistentAttributes.getOrDefault("startRoutine", "");
-        if (!startRoutineCheck.equals("")) {
-            startRoutine = startRoutineCheck.equals("true");
+        load(context);
+        return true;
+    }
+
+    private void HandlePersistentData() {
+        Log.Information("Loading settings from last session.");
+
+        startRoutine = getBoolean("startRoutine") | startRoutine;
+
+        settingsLoaded = true;
+    }
+
+    private void UpdatePersistentData() {
+        boolean any = false;
+
+        if (getBoolean("startRoutine") != startRoutine) {
+            setAttribute("startRoutine", startRoutine);
+            any = true;
         }
 
-        return true;
+        if (any) {
+            Log.Information("Saving settings.");
+            save(context);
+        }
     }
 
     @Override
     public int onLoop() {
-        if (Players.self() == null) return 1000;
-
+        if (Client.getState() != Client.IN_GAME && !Client.isLoading()) return 1000;
+        if (!settingsLoaded) HandlePersistentData();
+        UpdatePersistentData();
 
         if (startRoutine)
             Routine();
 
-        return 1000;
+        return loopDelay;
     }
 
     public void Routine() {
         ExecuteConsumables();
+
         if (Inventory.isFull()) {
             MovementHandler.GoTo(LocationModel.GetLocationByName(enemyChosen.closestDeposit));
         } else {
@@ -92,13 +115,17 @@ public final class MashCombat extends Plugin {
         if (consumableTimer.elapsed(TimeUnit.SECONDS) < consumableCooldown) return;
 
         Player player = Players.self();
-        if (enableFood && maxHealth < Helper.PercentOf(useFoodPercentage, (int) maxHealth)) {
-            WidgetItem food = ConsumableModel.GetFirstInInventoryOfType(ConsumableType.Health);
-            if (food != null) {
-                InventoryHandler.Interact(food, 1);
-                consumableTimer.reset().start();
-                return;
-            }
+        if (enableFood && maxHealth < Helper.PercentOf(useFoodPercentage, maxHealth)) {
+            InputHelper.pressKey(KeyboardKey.GetByIndex(foodKeybind));
+            consumableTimer.reset().start();
+            return;
+
+//            WidgetItem food = ConsumableModel.GetFirstInInventoryOfType(ConsumableType.Health);
+//            if (food != null) {
+//                InventoryHandler.Interact(food, 1);
+//                consumableTimer.reset().start();
+//                return;
+//            }
         }
 
 //        if (enableOverloads && ) {
@@ -120,12 +147,16 @@ public final class MashCombat extends Plugin {
 //        }
 
         if (enablePrayerRenew && Variables.MAX_HEALTH_AMOUNT.getValue() < usePrayerRenewValue) {
-            WidgetItem prayer = ConsumableModel.GetFirstInInventoryOfType(ConsumableType.Prayer);
-            if (prayer != null) {
-                InventoryHandler.Interact(prayer, 1);
-                consumableTimer.reset().start();
-                return;
-            }
+            InputHelper.pressKey(KeyboardKey.GetByIndex(prayerKeybind));
+            consumableTimer.reset().start();
+            return;
+
+//            WidgetItem prayer = ConsumableModel.GetFirstInInventoryOfType(ConsumableType.Prayer);
+//            if (prayer != null) {
+//                InventoryHandler.Interact(prayer, 1);
+//                consumableTimer.reset().start();
+//                return;
+//            }
         }
     }
 
